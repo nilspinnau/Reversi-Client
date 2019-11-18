@@ -5,22 +5,23 @@
 #include <stdlib.h>
 #include "performConnection.h"
 
-#define HOSTNUMBER (1357)
-#define GAMEKINDNAME ("Reversi")
-#define HOSTNAME ("sysprak.priv.lab.nm.ifi.lmu.de")
-
-
+#define GAMEKINDNAME "Reversi"
+#define PORTNUMBER 1357
+#define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 
 int main(int argc, char **argv) {
-
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    
-    struct hostent *hstnm;
-    if((hstnm = gethostbyname(HOSTNAME)) == NULL) {
-        perror("gethostbyname");
+    long i = strtol(argv[1], NULL, 10);
+    if (argc != 2) {
+        printf("Bitte geben Sie eine 13-stellige Game-ID und die gewünschte Spielernummer an");
+        return -1;
     }
-
-    performConnection();
-
-    exit(EXIT_SUCCESS);
+    if (i < 1 || i > 2) {
+        printf("Spielerzahl muss entweder 1 oder 2 sein");
+        return -1;
+    }
+    if (strlen(argv[0]) != 13) {
+        printf("Game-ID muss 13-stellig sein");
+        return -1;
+    }
+    return 0;
 }
