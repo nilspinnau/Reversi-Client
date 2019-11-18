@@ -1,7 +1,12 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
 
 
-
-
-int performConnection() {
-    
-}
+// Prolog Phase der Kommunikation
+// Zuweisung eines freien Spielers durch Gameserver
+// @param int socketfd: FIle-Deskriptor des Sockets
+int performConnection(int socketfd);
