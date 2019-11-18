@@ -3,7 +3,8 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <stdlib.h>
-#include "performConnection.h"
+#include <string.h>
+//#include "performConnection.h"
 
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
