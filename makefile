@@ -1,16 +1,20 @@
-CC:= gcc
-CFLAGS := -Wall -Wextra -Werror
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror
+TARGET = sysprak-client
+GAME_ID = 1234567890123
+PLAYER = 1
 
-TARGET:= sysprak-client
-VAR:= GAME_ID<GAME-ID> PLAYER=<{1,2}>
-all: play
+
+all: final
+
 
 $(TARGET).o: $(TARGET).c 
 	$(CC) $(CFLAGS) -c $(TARGET).c -o $(TARGET).o
 
-play: $(TARGET).o
-	echo $(VAR)
-	$(CC) $(CFLAGS) $(TARGET).o $(TARGET)
+final: $(TARGET).o
+	$(CC) $(CFLAGS) $(TARGET).o -o $(TARGET)
+play: 
+	./$(TARGET) data
 
 clean:
 	$(RM) $(TARGET).o $(TARGET)
