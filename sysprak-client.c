@@ -12,7 +12,10 @@
 #define PORTNUMBER 1357
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 
+void perror(const char *str) {}
+
 int main(int argc, char **argv) {
+
     int opt;
     int gameId;
     int playerNr;
@@ -36,7 +39,7 @@ int main(int argc, char **argv) {
     struct hostent *server;
     server = gethostbyname(HOSTNAME);
     if (server == NULL) {
-        printf("ERROR, no such host\n");
+        perror("ERROR, no such host\n");
         exit(0);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -45,17 +48,17 @@ int main(int argc, char **argv) {
         (char *)&serv_addr.sin_addr.s_addr,
         server->h_length);
     serv_addr.sin_port = htons(portno);
-    
+
     printf("Please enter the message: ");
     bzero(buffer,256);
     fgets(buffer,255,stdin);
     n = write(sockfd,buffer,strlen(buffer));
     if (n < 0)
-        printf("ERROR writing to socket");
+        perror("ERROR writing to socket");
     bzero(buffer,256);
     n = read(sockfd,buffer,255);
     if (n < 0)
-        printf("ERROR reading from socket");
+        perror("ERROR reading from socket");
     printf("%s\n",buffer);
     return 0;
 }
