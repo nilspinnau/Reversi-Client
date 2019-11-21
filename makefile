@@ -1,16 +1,14 @@
-CC = gcc
-CFLAGS =  -Wall -Wextra -Werror -e 
-TARGET = sysprak-client
+CC = /usr/bin/gcc
+WFLAGS = -Werror -Wextra -Wall
 
-all: final
+all: sysprak-client
 
-$(TARGET).o: $(TARGET).c 
-	$(CC) $(CFLAGS) -c $(TARGET).c -o $(TARGET).o
-final: $(TARGET).o
-	$(CC) $(CFLAGS) $(TARGET).o -o $(TARGET)
-play: 
-	./$(TARGET) -g $(GAME_ID) -p $(PLAYER) 
+performConnection.o: performConnection.h performConnection.c
+	$(CC) $(WFLAGS) -c performConnection.c
 
-clean:
-	rm -f $(TARGET).o $(TARGET)
+sysprak-client: sysprak-client.c performConnection.o
+	$(CC) $(WFLAGS) -o $@ performConnection.o sysprak-client.c
+
+clear:
+	rm -f sysprak-client.o sysprak-client
 
