@@ -60,5 +60,6 @@ int main(int argc, char **argv) {
     if (n < 0)
         perror("ERROR reading from socket");
     printf("%s\n",buffer);
+    performConnection(sockfd);
     return 0;
 }
