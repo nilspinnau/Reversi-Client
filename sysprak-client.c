@@ -20,12 +20,14 @@ int main(int argc, char **argv) {
     int gameId;
     int playerNr;
 
-    while ((opt = getopt (argc, argv, "g:p:")) != -1) {
+     while ((opt = getopt (argc, argv, "g:p:")) != -1) {
         switch (opt) {
             case 'g':
+ 	            gameId = atoi(optarg);
+	            break;
             case 'p':
-                gameId = atof(argv[0]);
-                playerNr = atof(argv[1]);
+                playerNr = atoi(optarg);
+	            break;
         }
     }
     int sockfd, newsockfd, portno, clilen, n;
