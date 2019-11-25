@@ -1,15 +1,38 @@
 #include "performConnection.h"
 
-
+#define BUF 256
 // vielleicht noch fehlerbehandlung von send bearbeiten
-int performConnection(int socketfd) {
+int performConnection(int sockfd) {
 
-    float version = 2.0;
+    /*float version = 2.0;
     char GAME_ID[13];
 
     char data[256];
+    */
+    char *buffer = (char*) malloc(sizeof(char)*BUF);
+    ssize_t size;
+   
+    do {
+    // Der Client wartet auf die erste Nachricht des Servers
+    size = recv(sockfd, buffer, BUF-1, 0);
+    if(buffer[0] == '+' ){
+      buffer[size]='\0';
+      printf("S: %s", buffer);
+   
+      printf("C: VERSION ");
+      fgets(buffer, BUF, stdin);
+      send(sockfd,buffer,strlen(buffer),0);
+    }else{
+       EXIT_FAILURE;
+    }
+    
+      }while (strcmp (buffer, "quit\n")!=0);
+    close(sockfd);    
+    free(buffer);
+    exit(EXIT_SUCCESS);
+}
 
-    while(recv(socketfd, data, sizeof(data), 0) != 0) {
+    /*while(recv(socketfd, data, sizeof(data), 0) > 0) {
         switch(data[0]) {
             case '+':
                 printf("S: %s", data);
@@ -69,10 +92,14 @@ int performConnection(int socketfd) {
                 close(socketfd);
                 exit(EXIT_FAILURE);
         }
-    }
+    } 
     exit(EXIT_SUCCESS);
 }
+<<<<<<< HEAD
 
 
+=======
+*/
+>>>>>>> d55f394c5bc138b635158c6d2d88e057545a4b53
 
 
