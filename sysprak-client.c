@@ -56,19 +56,6 @@ int main(int argc, char **argv) {
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
         perror("ERROR connecting");
     }
-    /*bzero(buffer,256);
-    fgets(buffer,255,stdin); 
-    
-    n = read(sockfd,buffer,255);
-    if (n < 0)
-        perror("ERROR reading from socket");
-    printf("%s\n",buffer);
-    */
-    
-    /*n = write(sockfd,buffer,strlen(buffer));
-    if (n < 0)
-        perror("ERROR writing to socket");
-    bzero(buffer,256);*/
     int fd[2];
     pid_t pid =0;
     int ret_code =0;
@@ -98,7 +85,7 @@ int main(int argc, char **argv) {
     close(fd[1]);
    
    
-    performConnection(sockfd);
+    performConnection(sockfd,gameId,playerNr);
   }
   
     return 0;
