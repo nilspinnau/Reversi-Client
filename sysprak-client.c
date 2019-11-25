@@ -63,12 +63,42 @@ int main(int argc, char **argv) {
         perror("ERROR reading from socket");
     printf("%s\n",buffer);
     */
-    performConnection(sockfd);
     
     /*n = write(sockfd,buffer,strlen(buffer));
     if (n < 0)
         perror("ERROR writing to socket");
     bzero(buffer,256);*/
-    
-    return 0;
+    int fd[2];
+    pid_t pid =0;
+    int ret_code =0;
+    fd[0]=fd[1]=0;
+    pid = fork();
+    if (pid < 0) {
+    perror ("Fehler bei fork().");
+    exit(EXIT_FAILURE);
+    }
+   /*
+   * THINKER = ELTERNPROZESS
+   */
+  if(pid >0){
+      // READSEITE der Pipe schliessen
+      close(fd[0]);
+    ret_code = waitpid(pid, NULL, 0);
+  if (ret_code < 0) {
+      perror ("Fehler beim Warten auf Kindprozess.");
+      exit(EXIT_FAILURE);
+    }  
 }
+  /*
+   * Connector = Kindprozess
+   */
+  else {
+      // Schreibseite der Pipe schliessen
+    close(fd[1]);
+   
+   
+    performConnection(sockfd);
+  }
+  
+    return 0;
+    }
