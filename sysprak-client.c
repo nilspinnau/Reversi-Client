@@ -15,32 +15,33 @@
 int main(int argc, char **argv) {
 
     int opt;
-    int gameId;
+    char* gameId;
     int playerNr;
 
      while ((opt = getopt (argc, argv, "g:p:")) != -1) {
         switch (opt) {
             case 'g':
- 	            gameId = atoi(optarg);
+ 	            gameId = optarg;
+		    if (strlen(gameId) != 13) {
+			perror("Bitte 13-stellige Game-Id eingeben");
+			}
 	            break;
             case 'p':
-                playerNr = atoi(optarg);
+                    playerNr = atoi(optarg);
+		    if (playerNr < 1 || playerNr > 2) {
+		       perror("Spieleranzahl 1 oder 2");
+			}
 	            break;
         }
     }
-    int sockfd, portno; //,n;
+    int sockfd, portno;
     struct sockaddr_in serv_addr;
-    struct hostent *server;
-    
-    //char buffer[256];
-    portno = PORTNUMBER;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
-        perror("ERROR opening socket");
-    bzero((char* ) &serv_addr, sizeof(serv_addr));
-    
 
-    
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    bzero((char* ) &serv_addr, sizeof(serv_addr));
+    portno = PORTNUMBER;
+
+    struct hostent *server;
     server = gethostbyname(HOSTNAME);
     if (server == NULL) {
         perror("ERROR, no such host\n");
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
     serv_addr.sin_family = AF_INET;
     bcopy((char *)server->h_addr,
         (char *)&serv_addr.sin_addr.s_addr,
-        server-> h_length);
+        server->h_length);
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
         perror("ERROR connecting");
