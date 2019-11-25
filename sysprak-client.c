@@ -12,8 +12,6 @@
 #define PORTNUMBER 1357
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 
-void perror(const char *str) {}
-
 int main(int argc, char **argv) {
 
     int opt;
@@ -26,13 +24,12 @@ int main(int argc, char **argv) {
  	            gameId = atoi(optarg);
 	            break;
             case 'p':
-                playerNr = atoi(optarg);
+                    playerNr = atoi(optarg);
 	            break;
         }
     }
-    int sockfd, newsockfd, portno, clilen, n;
-    char buffer[256];
-    struct sockaddr_in serv_addr, cli_addr;
+    int sockfd, portno;
+    struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bzero((char* ) &serv_addr, sizeof(serv_addr));
@@ -46,21 +43,14 @@ int main(int argc, char **argv) {
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr_list[0],
+    bcopy((char *)server->h_addr,
         (char *)&serv_addr.sin_addr.s_addr,
         server->h_length);
     serv_addr.sin_port = htons(portno);
-
-    printf("Please enter the message: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd,buffer,strlen(buffer));
-    if (n < 0)
-        perror("ERROR writing to socket");
-    bzero(buffer,256);
-    n = read(sockfd,buffer,255);
-    if (n < 0)
-        perror("ERROR reading from socket");
-    printf("%s\n",buffer);
+    if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0) {
+	perror("ERROR connecting");
+	}
+    performConnection(sockfd);
+    printf("%i",gameId);
     return 0;
 }

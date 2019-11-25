@@ -73,8 +73,6 @@ int performConnection(int socketfd) {
     exit(EXIT_SUCCESS);
 }
 
-int main(){
 
-}
 
 
