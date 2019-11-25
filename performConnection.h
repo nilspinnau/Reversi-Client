@@ -9,4 +9,4 @@
 // Prolog Phase der Kommunikation
 // Zuweisung eines freien Spielers durch Gameserver
 // @param int socketfd: FIle-Deskriptor des Sockets
-int performConnection(int socketfd);
+int performConnection(int socketfd, char *gameId, int playerNr);
