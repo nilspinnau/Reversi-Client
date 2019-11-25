@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/shm.h>
 #include "performConnection.h"
 
 #define GAMEKINDNAME "Reversi"
@@ -23,13 +24,13 @@ int main(int argc, char **argv) {
             case 'g':
  	            gameId = optarg;
 		    if (strlen(gameId) != 13) {
-			perror("Bitte 13-stellige Game-Id eingeben");
+			perror("Bitte 13-stellige Game-Id eingeben\n");
 			}
 	            break;
             case 'p':
                     playerNr = atoi(optarg);
 		    if (playerNr < 1 || playerNr > 2) {
-		       perror("Spieleranzahl 1 oder 2");
+		       perror("Spieleranzahl 1 oder 2\n");
 			}
 	            break;
         }
@@ -54,8 +55,23 @@ int main(int argc, char **argv) {
         server->h_length);
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0) {
-	perror("ERROR connecting");
+	perror("ERROR connecting\n");
 	}
     performConnection(sockfd, gameId, playerNr);
+
+    struct sharedMemory {
+	char* gameName;
+	int playerNr;
+	int playerCount;
+	pid_t thinker;
+	pid_t connector;
+	};
+
+    struct sharedMemory sm;
+
+    //int shm_id = shmget(IPC_PRIVATE,sizeof(sm),0);
+    //int *shm_ptr = shmat(shm_id, NULL, 0);
+    //printf("%d",shm_ptr);
+	
     return 0;
 }
