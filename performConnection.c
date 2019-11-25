@@ -25,7 +25,6 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 					// sending GameId
                     char answer[30];
                     sprintf(answer, "ID %s%s", id, "\n\0");
-					answer[17] = '\0';
                     send(socketfd, answer, sizeof(answer), 0);
                     printf("C: %s", answer);
 
@@ -33,6 +32,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                     // nothing happens, server sends another message
                 
                 } else if(strstr(data, "+ GAMENAME") != NULL) {
+					// sending playerNr
                     char answer[30];
                     sprintf(answer, "PLAYER %i%s", playerNr, "\n\0");
                     send(socketfd, answer, sizeof(answer), 0);
