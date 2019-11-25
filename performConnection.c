@@ -2,8 +2,9 @@
 
 #define BUF 256
 // vielleicht noch fehlerbehandlung von send bearbeiten
-int performConnection(int sockfd) {
-
+int performConnection(int sockfd, char gameId[], int playerNr) {
+    printf("%s",gameId);
+    printf("%i",playerNr);
     /*float version = 2.0;
     char GAME_ID[13];
 
@@ -11,7 +12,6 @@ int performConnection(int sockfd) {
     */
     char *buffer = (char*) malloc(sizeof(char)*BUF);
     ssize_t size;
-   
     do {
     // Der Client wartet auf die erste Nachricht des Servers
     size = recv(sockfd, buffer, BUF-1, 0);
@@ -19,14 +19,14 @@ int performConnection(int sockfd) {
       buffer[size]='\0';
       printf("S: %s", buffer);
    
-      printf("C: VERSION ");
+      printf("C: ");
       fgets(buffer, BUF, stdin);
       send(sockfd,buffer,strlen(buffer),0);
     }else{
        EXIT_FAILURE;
     }
     
-      }while (strcmp (buffer, "quit\n")!=0);
+    }while (strcmp (buffer, "quit\n")!=0);
     close(sockfd);    
     free(buffer);
     exit(EXIT_SUCCESS);
@@ -100,6 +100,5 @@ int performConnection(int sockfd) {
 
 =======
 */
->>>>>>> d55f394c5bc138b635158c6d2d88e057545a4b53
 
 
