@@ -46,7 +46,12 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                 
                 } else if(strstr(data, "+ ENDPLAYERS") != NULL) {
                     exit(EXIT_SUCCESS);
-                }
+                } else {
+					// disconnect, error message from server
+					printf("S: %s", data);            
+					close(socketfd);
+					exit(EXIT_FAILURE);
+				}
                 break;       
             default:
                 // disconnect, error message from server
