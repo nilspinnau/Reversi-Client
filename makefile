@@ -1,6 +1,5 @@
 CC = /usr/bin/gcc
 CFLAGS = -Werror -Wextra -Wall
-
 LDFLAGS = -lm -lpthread
 
 all: sysprak-client
@@ -13,12 +12,6 @@ sysprak-client: performConnection.o sysprak-client.c
 
 play:
 	./sysprak-client -g $(GAME_ID) -p $(PLAYER)
-
-sysprak-client: performConnection.o sysprak-client.c 
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ performConnection.o sysprak-client.c
-
-play: 
-	./sysprak-client -g $(GAME_ID) -p $(PLAYER) s
 
 clear:
 	rm -f sysprak-client.o sysprak-client performConnection.o

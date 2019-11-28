@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/wait.h>
 #include <sys/shm.h>
 #include "performConnection.h"
 
@@ -54,6 +55,7 @@ int main(int argc, char **argv) {
         (char *)&serv_addr.sin_addr.s_addr,
         server->h_length);
     serv_addr.sin_port = htons(portno);
+
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0) {
 	perror("ERROR connecting\n");
 	}
@@ -67,11 +69,45 @@ int main(int argc, char **argv) {
 	pid_t connector;
 	};
 
-    struct sharedMemory sm;
+    //struct sharedMemory sm;
 
     //int shm_id = shmget(IPC_PRIVATE,sizeof(sm),0);
-    //int *shm_ptr = shmat(shm_id, NULL, 0);
-    //printf("%d",shm_ptr);
+    //int *shm_ptr = (int*) shmat(shm_id, NULL, 0);
 	
     return 0;
+
+    if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
+        perror("ERROR connecting");
+    }
+    int fd[2];
+    pid_t pid =0;
+    int ret_code =0;
+    fd[0]=fd[1]=0;
+    pid = fork();
+    if (pid < 0) {
+    perror ("Fehler bei fork().");
+    exit(EXIT_FAILURE);
+    }
+   /*
+   * THINKER = ELTERNPROZESS
+   */
+  if(pid >0){
+      // READSEITE der Pipe schliessen
+      close(fd[0]);
+    ret_code = waitpid(pid, NULL, 0);
+  if (ret_code < 0) {
+      perror ("Fehler beim Warten auf Kindprozess.");
+      exit(EXIT_FAILURE);
+    }  
 }
+  /*
+   * Connector = Kindprozess
+   */
+  else {
+      // Schreibseite der Pipe schliessen
+    close(fd[1]);
+    performConnection(sockfd,gameId,playerNr);
+  }
+  
+    return 0;
+    }
