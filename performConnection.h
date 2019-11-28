@@ -10,3 +10,4 @@
 // Zuweisung eines freien Spielers durch Gameserver
 // @param int socketfd: FIle-Deskriptor des Sockets
 int performConnection(int socketfd, char *gameId, int playerNr);
+int readField(int socketfd);

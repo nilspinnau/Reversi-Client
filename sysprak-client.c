@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <sys/shm.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 #include "performConnection.h"
 
 #define GAMEKINDNAME "Reversi"
@@ -93,7 +95,7 @@ int main(int argc, char **argv) {
         close(fd[1]);
     
     
-        performConnection(sockfd,d%gameId[0],playerNr);
+        performConnection(sockfd,gameId,playerNr);
 
     }
 
@@ -101,19 +103,20 @@ int main(int argc, char **argv) {
         int playerNr;
         char *playerName;
         bool registered;
-    }
+    };
 
     struct sharedMemory {
         char* gameName;
         int playerNr;
         int playerCount;
         pid_t thinker;
-        pid_t connector:
-    }
+        pid_t connector;
+    };
 
     struct sharedMemory sm;
     int shm_id = shmget(IPC_PRIVATE,sizeof(sm),0);
     int *shm_ptr = (int*) shmat(shm_id,NULL,0);
+    printf("%p",shm_ptr);
     close(sockfd);
     return 0;
 }
