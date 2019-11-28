@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <sys/shm.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 #include "performConnection.h"
 
 #define GAMEKINDNAME "Reversi"
@@ -17,16 +19,19 @@
 int main(int argc, char **argv) {
 
     int opt;
-    char *gameId;
+    //char *gameId;
+    char gameId[14];
     int playerNr;
 
     while ((opt = getopt (argc, argv, "g:p:")) != -1) {
         switch (opt) {
             case 'g':
-                gameId = optarg;
-                if (strlen(gameId) != 13) {
+                if (strlen(optarg) != 13) {
 					perror("Bitte 13-stellige Game-Id eingeben");
 					exit(EXIT_FAILURE);
+                }
+                else {
+                strcpy(gameId, optarg);
                 } 
                 break;
             case 'p':
@@ -76,11 +81,12 @@ int main(int argc, char **argv) {
         // READSEITE der Pipe schliessen
         close(fd[0]);
         ret_code = waitpid(pid, NULL, 0);
-    }
-    if (ret_code < 0) {
+        if (ret_code < 0) {
         perror ("Fehler beim Warten auf Kindprozess.");
         exit(EXIT_FAILURE);
-    }  
+        }  
+    }
+    
     /*
     * Connector = Kindprozess
     */
@@ -90,6 +96,27 @@ int main(int argc, char **argv) {
     
     
         performConnection(sockfd,gameId,playerNr);
+
     }
+
+    struct player {
+        int playerNr;
+        char *playerName;
+        bool registered;
+    };
+
+    struct sharedMemory {
+        char* gameName;
+        int playerNr;
+        int playerCount;
+        pid_t thinker;
+        pid_t connector;
+    };
+
+    struct sharedMemory sm;
+    int shm_id = shmget(IPC_PRIVATE,sizeof(sm),0);
+    int *shm_ptr = (int*) shmat(shm_id,NULL,0);
+    printf("%p",shm_ptr);
+    close(sockfd);
     return 0;
 }
