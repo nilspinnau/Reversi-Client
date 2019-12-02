@@ -85,12 +85,13 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
-        handler(SIGUSR1);
         ret_code = waitpid(pid, NULL, 0);
         if (ret_code < 0) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
+        char *answer = think();
+        write(fd[1], answer, sizeof(answer));
     }
     
     /*
