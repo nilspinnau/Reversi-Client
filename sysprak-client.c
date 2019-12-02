@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include <stdbool.h>
 #include "performConnection.h"
+#include "think.h"
 
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
