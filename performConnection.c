@@ -15,7 +15,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 
                 if(strstr(buffer, "+ MNM Gameserver") != NULL) {
                     // sending client id/version
-		    
+
                     sprintf(buffer, "VERSION %s%s", version, "\n\0");
                     char answer[strlen(buffer)];
 		            strncpy(answer,buffer,strlen(buffer));
@@ -30,7 +30,9 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 		    		strncpy(answer,buffer,strlen(buffer));
                     send(socketfd, answer, sizeof(answer), 0);
                     printf("C: %s", answer);
-                    bzero((char *) &buffer, sizeof(buffer));
+                    bzero((char *) &buffer, sizeoplease send Game-ID to join") != NULL) {
+					// sending GameId
+f(buffer));
                 } else if(strstr(buffer, "+ PLAYING") != NULL) {
 
 		    		read(socketfd,buffer, sizeof(buffer));

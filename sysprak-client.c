@@ -93,12 +93,13 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-    
-    
         performConnection(sockfd,gameId,playerNr);
 
     }
-
+    
+    /*
+    * Datenstruktur um Spieler zu modellieren
+    */
     struct player {
         int playerNr;
         char *playerName;
@@ -106,6 +107,7 @@ int main(int argc, char **argv) {
     };
 
     struct sharedMemory {
+        struct player;
         char* gameName;
         int playerNr;
         int playerCount;
