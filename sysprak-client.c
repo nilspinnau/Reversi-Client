@@ -10,11 +10,16 @@
 #include <sys/shm.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <signal.h>
+
+#include "signalHandler.h"
 #include "performConnection.h"
+
 
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
+
 
 int main(int argc, char **argv) {
 
@@ -80,10 +85,11 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
+        handler(SIGUSR1);
         ret_code = waitpid(pid, NULL, 0);
         if (ret_code < 0) {
-        perror ("Fehler beim Warten auf Kindprozess.");
-        exit(EXIT_FAILURE);
+            perror ("Fehler beim Warten auf Kindprozess.");
+            exit(EXIT_FAILURE);
         }  
     }
     
@@ -122,3 +128,5 @@ int main(int argc, char **argv) {
     close(sockfd);
     return 0;
 }
+
+
