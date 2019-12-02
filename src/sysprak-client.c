@@ -12,9 +12,9 @@
 #include <stdbool.h>
 #include <signal.h>
 
-#include "signalHandler.h"
-#include "performConnection.h"
-#include "think.h"
+#include "../lib/signalHandler.h"
+#include "../lib/performConnection.h"
+#include "../lib/think.h"
 
 
 #define GAMEKINDNAME "Reversi"
@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
         // READSEITE der Pipe schliessen
         close(fd[0]);
         ret_code = waitpid(pid, NULL, 0);
+        signal(SIGUSR1, handler);
         if (ret_code < 0) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);

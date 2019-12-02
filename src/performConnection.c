@@ -1,4 +1,4 @@
-#include "performConnection.h"
+#include "../lib/performConnection.h"
 
 
 // vielleicht noch fehlerbehandlung von send bearbeiten
@@ -110,8 +110,7 @@ int readField(int socketfd) {
         write(socketfd, "THINKING\n\0", 10*sizeof(char));
     }
     // anstoß des thinkers per SIGUSR1
-    signal(SIGUSR1, handler);
+    kill(sm->thinker, SIGUSR1);
 	return 0;
 }
-
 
