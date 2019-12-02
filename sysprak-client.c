@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
         performConnection(sockfd,gameId,playerNr);
 
     }
-    
+
     /*
     * Datenstruktur um Spieler zu modellieren
     */
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
     };
 
     struct sharedMemory {
-        struct player;
+        struct player p;
         char* gameName;
         int playerNr;
         int playerCount;
