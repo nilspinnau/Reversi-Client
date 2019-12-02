@@ -78,8 +78,8 @@ int main(int argc, char **argv) {
     fd[0]=fd[1]=0;
     pid = fork();
     if (pid < 0) {
-    perror ("Fehler bei fork().");
-    exit(EXIT_FAILURE);
+        perror ("Fehler bei fork().");
+        exit(EXIT_FAILURE);
     }
    /*
    * THINKER = ELTERNPROZESS

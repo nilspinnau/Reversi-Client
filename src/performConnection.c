@@ -115,13 +115,8 @@ int readField(int socketfd) {
             break;
         }
 	}
-    read(socketfd, buffer, size);
-    if(strstr(buffer, "+ ENDFIELD")) {
-        write(socketfd, "THINKING\n\0", 10*sizeof(char));
-    }
+    game(socketfd);
     // anstoß des thinkers per SIGUSR1
-    int *shm_ptr = initialize();
-    printf("%p", shm_ptr);
     //kill(shm->thinker, SIGUSR1);
 	return 0;
 }
