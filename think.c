@@ -1,4 +1,5 @@
 #include "think.h"
-char *think(int socketfd){
+
+char *think(){
   return "E6" ;
 }
