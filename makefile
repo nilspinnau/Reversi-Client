@@ -1,6 +1,7 @@
 CC = /usr/bin/gcc
 CFLAGS = -Werror -Wextra -Wall
-LDFLAGS = -lm -lpthread
+OBJ= *.c
+#LDFLAGS = -lm -lpthread
 all: sysprak-client
 
 performConnection.o: performConnection.h performConnection.c
