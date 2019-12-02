@@ -78,6 +78,15 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
     exit(EXIT_SUCCESS);
 }
 
+int game(int socketfd) {
+    char buffer[256] = {0};
+    size_t size = sizeof(buffer);
+    while(read(socketfd, buffer, size)) {
+
+    }
+    return 0;
+}
+
 int readField(int socketfd) {
 	char buffer[256] = {0};
     size_t size = sizeof(buffer);
@@ -87,11 +96,12 @@ int readField(int socketfd) {
                 read(socketfd, buffer, size);
                 bzero(buffer, size);
             }
-		} else if (strstr(buffer, "+ ENDFIELD") != NULL) {
             game(socketfd);
-        } 
+        }
 	}
 	return 0;
 }
+
+
 
 
