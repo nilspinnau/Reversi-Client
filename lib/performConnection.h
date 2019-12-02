@@ -7,6 +7,7 @@
 #include <signal.h>
 
 #include "../lib/signalHandler.h"
+#include "../lib/shm.h"
 
 
 // Prolog Phase der Kommunikation

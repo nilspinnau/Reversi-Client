@@ -15,6 +15,7 @@
 #include "../lib/signalHandler.h"
 #include "../lib/performConnection.h"
 #include "../lib/think.h"
+#include "../lib/shm.h"
 
 
 #define GAMEKINDNAME "Reversi"
