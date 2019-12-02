@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/shm.h>
+#include <sys/types.h>
+
 
 
 

@@ -93,7 +93,7 @@ int game(int socketfd) {
             bzero((char *) &buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ MOVE %d") != NULL) {
-            int time = strtod(buffer);
+            //int time = strtod(buffer);
             read(socketfd, buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ GAMEOVER") != NULL) {
@@ -120,7 +120,9 @@ int readField(int socketfd) {
         write(socketfd, "THINKING\n\0", 10*sizeof(char));
     }
     // anstoß des thinkers per SIGUSR1
-    kill(sm->thinker, SIGUSR1);
+    int *shm_ptr = initialize();
+    printf("%p", shm_ptr);
+    //kill(shm->thinker, SIGUSR1);
 	return 0;
 }
 
