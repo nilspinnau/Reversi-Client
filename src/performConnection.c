@@ -1,4 +1,4 @@
-#include "performConnection.h"
+#include "../lib/performConnection.h"
 
 
 // vielleicht noch fehlerbehandlung von send bearbeiten
@@ -84,10 +84,20 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 int game(int socketfd) {
     char buffer[256] = {0};
     while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {
-        if (strstr(buffer, "+ WAIT") != NULL) {
+        if (strstr(buffer, "+ ENDFIELD") != NULL) {
+            send(socketfd,"THINKING\n\0",10*sizeof(char),0);
+            bzero((char *) &buffer, sizeof(buffer));
+        }
+        else if (strstr(buffer, "+ WAIT") != NULL) {
 			send(socketfd,"OKWAIT\n\0",8*sizeof(char),0);
             bzero((char *) &buffer, sizeof(buffer));
-		
+        }
+        else if (strstr(buffer, "+ MOVE %d") != NULL) {
+            int time = strtod(buffer);
+            read(socketfd, buffer, sizeof(buffer));
+        }
+        else if (strstr(buffer, "+ GAMEOVER") != NULL) {
+            
         }
     }
     return 0;
@@ -110,8 +120,7 @@ int readField(int socketfd) {
         write(socketfd, "THINKING\n\0", 10*sizeof(char));
     }
     // anstoß des thinkers per SIGUSR1
-    signal(SIGUSR1, handler);
+    kill(sm->thinker, SIGUSR1);
 	return 0;
 }
-
 

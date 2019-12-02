@@ -1,11 +1,12 @@
 CC = /usr/bin/gcc
 CFLAGS = -Werror -Wextra -Wall
-OBJ= *.c
+OBJ= src/*.c
 #LDFLAGS = -lm -lpthread
 all: sysprak-client
 
-%.o: %.c %.h
+/obj%.o: src/%.c lib/%.h
 	$(CC) $(CFLAGS) -c $< -o $@
+	
 sysprak-client: $(OBJ)
 	$(CC) $(CFLAGS)  -o sysprak-client $(OBJ)
 
