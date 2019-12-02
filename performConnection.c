@@ -57,8 +57,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                     bzero((char *) &buffer, sizeof(buffer));
                 
                 } else if(strstr(buffer, "+ ENDPLAYERS") != NULL) {
-					
-                    readField(socketfd);
+                    break;
                     exit(EXIT_SUCCESS);
                 
                 } else {
@@ -75,30 +74,26 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                 exit(EXIT_FAILURE);
         }
     }
+    readField(socketfd);
     exit(EXIT_SUCCESS);
 }
 
 int readField(int socketfd) {
 	char buffer[256] = {0};
+    size_t size = sizeof(buffer);
 	while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {
 		if (strstr(buffer, "+ FIELD 8,8") != NULL) {
-			
-		
-		} else if (strstr(buffer, "+ WAIT") != NULL) {
-			send(socketfd,"OKWAIT\n\0",8*sizeof(char),0);
-            bzero((char *) &buffer, sizeof(buffer));
-		
-        } else if (strstr(buffer, "ENDFIELD") != NULL) {
-			send(socketfd,"THINKING\n\0",10*sizeof(char),0);
-            bzero((char *) &buffer, sizeof(buffer));
-		
-        } else {
-            bzero((char *) &buffer, sizeof(buffer));
-			read(socketfd,buffer,sizeof(buffer));
-			send(socketfd,"THINKING\n\0",10*sizeof(char),0);
-            bzero((char *) &buffer, sizeof(buffer));
-		}
+			for(int i=0; i < 8; i++) {
+                read(socketfd, buffer, size);
+                bzero(buffer, size);
+            }
+		} else if (strstr(buffer, "+ ENDFIELD") != NULL) {
+            break;
+        } 
 	}
+    send(socketfd,"THINKING\n\0",10*sizeof(char),0);
+    bzero((char *) &buffer, size);
+
 	return 0;
 }
 
