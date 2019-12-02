@@ -122,9 +122,5 @@ int readField(int socketfd) {
     // anstoß des thinkers per SIGUSR1
     kill(sm->thinker, SIGUSR1);
 	return 0;
-<<<<<<< HEAD:performConnection.c
-}
-=======
 }
 
->>>>>>> e241274ffed7ddd57cdc949225ff42b34d0e76d4:src/performConnection.c
