@@ -4,6 +4,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
+
+#include "signalHandler.h"
 
 
 // Prolog Phase der Kommunikation
