@@ -1,5 +1,5 @@
 #include "../lib/performConnection.h"
-
+#include <time.h>
 
 // vielleicht noch fehlerbehandlung von send bearbeiten
 int performConnection(int socketfd, char *gameId, int playerNr) {
@@ -25,7 +25,6 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                     printf("C: %s", answer);
                     bzero((char *) &buffer, sizeof(buffer));
                     bzero(answer, sizeof(answer));
-                
                 } else if(strstr(buffer, "+ Client version accepted - please send Game-ID to join") != NULL) {
 					// sending GameId
 
@@ -93,11 +92,23 @@ int game(int socketfd) {
             bzero((char *) &buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ MOVE %d") != NULL) {
-            int time = strtod(buffer);
+            char *ptr;
+            int msec = 0, time = strtod(buffer,&ptr);
+            clock_t before = clock()
+            int iterations = 0;
+
+            do {
+                clock_t difference = clock() - time;
+                msec = difference * 1000 / CLOCKS_PER_SEC;
+                iterations++;
+            } while (msec < time);
+            
             read(socketfd, buffer, sizeof(buffer));
+            bzero(buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ GAMEOVER") != NULL) {
-            
+            read(socketfd, buffer, sizeof(buffer));
+            bzero(buffer, sizeof(buffer));
         }
     }
     return 0;
@@ -119,12 +130,8 @@ int readField(int socketfd) {
     if(strstr(buffer, "+ ENDFIELD")) {
         write(socketfd, "THINKING\n\0", 10*sizeof(char));
     }
+    
     // anstoß des thinkers per SIGUSR1
     kill(sm->thinker, SIGUSR1);
 	return 0;
-<<<<<<< HEAD:performConnection.c
 }
-=======
-}
-
->>>>>>> e241274ffed7ddd57cdc949225ff42b34d0e76d4:src/performConnection.c

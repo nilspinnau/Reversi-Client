@@ -15,8 +15,11 @@
         pid_t thinker;
         pid_t connector;
     };
-
+    
+    int initialize() {
     struct sharedMemory sm;
     int shm_id = shmget(IPC_PRIVATE,sizeof(sm),0);
     int *shm_ptr = (int*) shmat(shm_id,NULL,0);
     printf("%p",shm_ptr);
+    return shm_id;
+    }
