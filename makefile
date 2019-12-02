@@ -4,6 +4,7 @@ OBJ= *.c
 #LDFLAGS = -lm -lpthread
 all: sysprak-client
 
+<<<<<<< HEAD
 %.o: %.c *.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -15,9 +16,15 @@ sysprak-client: $(OBJ)
 
 #sysprak-client: performConnection.o sysprak-client.c 
 #	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ performConnection.o sysprak-client.c
+=======
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $< -o $@
+sysprak-client: $(OBJ)
+	$(CC) $(CFLAGS)  -o sysprak-client $(OBJ)
+>>>>>>> 8623844357c5ae9e2f9c1eb7f809f77535204f06
 
 play: 
 	./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
 
 clear:
-	rm -f sysprak-client.o sysprak-client performConnection.o
+	rm -f *.o sysprak-client 
