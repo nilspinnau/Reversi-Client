@@ -88,12 +88,9 @@ int readField(int socketfd) {
                 bzero(buffer, size);
             }
 		} else if (strstr(buffer, "+ ENDFIELD") != NULL) {
-            break;
+            game(socketfd);
         } 
 	}
-    send(socketfd,"THINKING\n\0",10*sizeof(char),0);
-    bzero((char *) &buffer, size);
-
 	return 0;
 }
 
