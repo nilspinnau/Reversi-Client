@@ -1,4 +1,4 @@
-#include "performConnection.h"
+#include "../lib/performConnection.h"
 
 
 // vielleicht noch fehlerbehandlung von send bearbeiten
@@ -6,11 +6,13 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 
     char *version = "2.3";
     char buffer[256] = {0};
+    int n = 0;
 
     while(recv(socketfd, buffer, sizeof(buffer), 0) != 0) {
         switch(buffer[0]) {
             case '+':
-                printf("S: %s", buffer);
+                n = strlen(buffer);
+                printf("S: %.*s", n, buffer);
 
                 if(strstr(buffer, "+ MNM Gameserver") != NULL) {
                     // sending client id/version
@@ -40,7 +42,8 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 
                     bzero(buffer, sizeof(buffer));
 		    		read(socketfd,buffer, sizeof(buffer));
-		    		printf("S: %s", buffer);
+                    int length = strlen(buffer);
+		    		printf("S: %.*s", length, buffer);
 	 	    		send(socketfd,"PLAYER\n\0",sizeof(char)*8,0);
 					printf("%d",playerNr);
                     bzero((char *) &buffer, sizeof(buffer));
@@ -109,8 +112,19 @@ int readField(int socketfd) {
                 read(socketfd, buffer, size);
                 bzero(buffer, size);
             }
-            game(socketfd);
+            break;
         }
 	}
+    read(socketfd, buffer, size);
+    if(strstr(buffer, "+ ENDFIELD")) {
+        write(socketfd, "THINKING\n\0", 10*sizeof(char));
+    }
+    // anstoß des thinkers per SIGUSR1
+    kill(sm->thinker, SIGUSR1);
 	return 0;
+<<<<<<< HEAD:performConnection.c
 }
+=======
+}
+
+>>>>>>> e241274ffed7ddd57cdc949225ff42b34d0e76d4:src/performConnection.c
