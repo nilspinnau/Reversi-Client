@@ -57,7 +57,8 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                     bzero((char *) &buffer, sizeof(buffer));
                 
                 } else if(strstr(buffer, "+ ENDPLAYERS") != NULL) {
-                    break;
+					
+                    readField(socketfd);
                     exit(EXIT_SUCCESS);
                 
                 } else {
@@ -74,15 +75,17 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                 exit(EXIT_FAILURE);
         }
     }
-    readField(socketfd);
     exit(EXIT_SUCCESS);
 }
 
 int game(int socketfd) {
     char buffer[256] = {0};
-    size_t size = sizeof(buffer);
-    while(read(socketfd, buffer, size)) {
-
+    while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {
+        if (strstr(buffer, "+ WAIT") != NULL) {
+			send(socketfd,"OKWAIT\n\0",8*sizeof(char),0);
+            bzero((char *) &buffer, sizeof(buffer));
+		
+        }
     }
     return 0;
 }
@@ -101,7 +104,5 @@ int readField(int socketfd) {
 	}
 	return 0;
 }
-
-
 
 
