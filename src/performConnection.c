@@ -79,7 +79,8 @@ int game(int socketfd) {
         else if (strstr(buffer, "+ MOVE %d") != NULL) {
             char *ptr;
             int msec = 0, time = strtod(buffer,&ptr);
-            clock_t before = clock()
+            //clock_t before = clock();
+            
             int iterations = 0;
 
             do {
