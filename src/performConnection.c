@@ -64,7 +64,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
     readField(socketfd);
     exit(EXIT_SUCCESS);
 }
-
+//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
 int game(int socketfd) {
     char buffer[256] = {0};
     while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {

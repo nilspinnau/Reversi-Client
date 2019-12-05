@@ -18,6 +18,20 @@
 #include "../lib/shm.h"
 #include "../lib/getconfig.h"
 
+struct player {
+    int playerNr;
+    char playerName[10];
+    bool registered;
+};
+
+struct sharedMemory {
+    //struct player p;
+    char gameName[10];
+    int playerNr;
+    int playerCount;
+    pid_t thinker;
+    pid_t connector;
+};
 
 /*
 #define GAMEKINDNAME "Reversi"
@@ -100,6 +114,10 @@ int main(int argc, char **argv) {
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
+    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
+    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+    
     pid = fork();
     if (pid < 0) {
         perror ("Fehler bei fork().");
@@ -128,7 +146,7 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         performConnection(sockfd,gameId,playerNr);
-
+        sm->thinker = getpid();
     }
 
     close(sockfd);
