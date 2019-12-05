@@ -14,7 +14,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                 n = strlen(buffer);
                 printf("S: %.*s", n, buffer);
 
-                if(strstr(buffer, "+ MNM Gameserver") != NULL) {
+                if(strstr(buffer, "+ MNM Gameserver")) {
                     // sending client id/version
 		    
                     bzero(buffer, sizeof(buffer));
@@ -23,7 +23,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 		            strncpy(answer,buffer,strlen(buffer));
                     send(socketfd, answer, sizeof(answer), 0);
                     printf("C: %s", answer);
-                    bzero((char *) &buffer, sizeof(buffer));
+                    bzero(buffer, sizeof(buffer));
                     bzero(answer, sizeof(answer));
                 } else if(strstr(buffer, "+ Client version accepted - please send Game-ID to join") != NULL) {
 					// sending GameId
@@ -34,41 +34,25 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 		    		strncpy(answer,buffer,strlen(buffer));
                     send(socketfd, answer, sizeof(answer), 0);
                     printf("C: %s", answer);
-                    bzero((char *) &buffer, sizeof(buffer));
+                    bzero(buffer, sizeof(buffer));
                     bzero(answer, sizeof(answer));
                 
-                } else if(strstr(buffer, "+ PLAYING") != NULL) {
+                } else if(strstr(buffer, "+ PLAYING")) {
 
                     bzero(buffer, sizeof(buffer));
 		    		read(socketfd,buffer, sizeof(buffer));
                     int length = strlen(buffer);
 		    		printf("S: %.*s", length, buffer);
-	 	    		send(socketfd,"PLAYER\n\0",sizeof(char)*8,0);
+	 	    		send(socketfd,"PLAYER\n",sizeof(char)*7,0);
 					printf("%d",playerNr);
-                    bzero((char *) &buffer, sizeof(buffer));
+                    bzero(buffer, sizeof(buffer));
 
-                }  else if(strstr(buffer, "+ YOU") != NULL) {
-                    // server: Mitspielernummer and Mitspielername
-                    
-                    bzero((char *) &buffer, sizeof(buffer));
-                
-                } else if(strstr(buffer, "+ TOTAL") != NULL) {
-                    // server: Mitspieleranzahl
-                    
-		    		printf("S: %s", buffer);
-                    bzero((char *) &buffer, sizeof(buffer));
-                
-                } else if(strstr(buffer, "+ ENDPLAYERS") != NULL) {
-					
-                    readField(socketfd);
-                    exit(EXIT_SUCCESS);
-                
-                } else {
-					// disconnect, error message from server
-					printf("S: %s", buffer);            
-					close(socketfd);
-					exit(EXIT_FAILURE);
-				}
+                } else if(strstr(buffer, "+ ENDFIELD")) {
+                    write(socketfd, "THINKING\n", 9*sizeof(char));
+                    printf("C: THINKING\n");
+                    bzero(buffer, sizeof(buffer));
+                } 
+                bzero(buffer, sizeof(buffer));
                 break;       
             default:
                 // disconnect, error message from server
@@ -77,6 +61,7 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                 exit(EXIT_FAILURE);
         }
     }
+    readField(socketfd);
     exit(EXIT_SUCCESS);
 }
 
@@ -120,7 +105,10 @@ int readField(int socketfd) {
 	char buffer[256] = {0};
     size_t size = sizeof(buffer);
 	while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {
-		if (strstr(buffer, "+ FIELD 8,8") != NULL) {
+		if(strstr(buffer, "+ ENDFIELD")) {
+                    write(socketfd, "THINKING\n", 9*sizeof(char));
+                    bzero(buffer, sizeof(buffer));
+        } else if (strstr(buffer, "+ FIELD 8,8") != NULL) {
 			for(int i=0; i < 8; i++) {
                 read(socketfd, buffer, size);
                 bzero(buffer, size);
