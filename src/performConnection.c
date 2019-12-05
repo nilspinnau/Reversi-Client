@@ -77,19 +77,23 @@ int game(int socketfd) {
             bzero((char *) &buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ MOVE %d") != NULL) {
+            //Timer to measure maximum length of a turn
             char *ptr;
             int msec = 0, time = strtod(buffer,&ptr);
-            //clock_t before = clock();
-            
+            clock_t before = clock();
             int iterations = 0;
-
             do {
-                clock_t difference = clock() - time;
+                clock_t difference = clock() - before;
                 msec = difference * 1000 / CLOCKS_PER_SEC;
                 iterations++;
             } while (msec < time);
-            
+            if (msec == time) {
+                exit(EXIT_FAILURE);
+            }
             read(socketfd, buffer, sizeof(buffer));
+            if (strstr(buffer, "+ FIELD %d %d") != NULL) {
+                
+            }
             bzero(buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ GAMEOVER") != NULL) {
