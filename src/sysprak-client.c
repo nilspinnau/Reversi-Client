@@ -15,7 +15,6 @@
 #include "../lib/signalHandler.h"
 #include "../lib/performConnection.h"
 #include "../lib/think.h"
-#include "../lib/shm.h"
 #include "../lib/getconfig.h"
 
 struct player {
