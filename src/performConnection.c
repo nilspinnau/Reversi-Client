@@ -77,7 +77,7 @@ int game(int socketfd) {
             bzero((char *) &buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ MOVE %d") != NULL) {
-            //Timer to measure maximum length of a turn
+            //timer to measure maximum length of a turn
             char *ptr;
             int msec = 0, time = strtod(buffer,&ptr);
             clock_t before = clock();
@@ -91,18 +91,50 @@ int game(int socketfd) {
                 exit(EXIT_FAILURE);
             }
             read(socketfd, buffer, sizeof(buffer));
-            if (strstr(buffer, "+ FIELD %d %d") != NULL) {
-                
+            //print out field state of given line and column
+            if (strstr(buffer, "+ ENDFIELD")) {
+                    write(socketfd, "THINKING\n", 9*sizeof(char));
+                    bzero(buffer, sizeof(buffer));
             }
-            bzero(buffer, sizeof(buffer));
+            else if (strstr(buffer, "+ FIELD %d %d") != NULL) {
+                char *ptr;
+                int line = strtod(buffer,&ptr); 
+                int column = strtod(ptr,&ptr);
+                for (int i=0; i < line; i++) {
+                    for (int i=0; i < column; i++) {
+                        read(socketfd, buffer, sizeof(buffer));
+                        bzero(buffer, sizeof(buffer));
+                    }
+                }
+            }
         }
         else if (strstr(buffer, "+ GAMEOVER") != NULL) {
             read(socketfd, buffer, sizeof(buffer));
             bzero(buffer, sizeof(buffer));
+            if (strstr(buffer, "+ FIELD %d %d") != NULL) {
+                char *ptr;
+                int line = strtod(buffer,&ptr); 
+                int column = strtod(ptr,&ptr);
+                for (int i=0; i < line; i++) {
+                    for (int i=0; i < column; i++) {
+                        read(socketfd, buffer, sizeof(buffer));
+                        bzero(buffer, sizeof(buffer));
+                    }
+                }
+                if (strstr(buffer, "+ ENDFIELD") != NULL) {
+                    read(socketfd, buffer, sizeof(buffer));
+                    bzero(buffer, sizeof(buffer));
+                    if (strstr(buffer, "+ QUIT") != NULL) {
+                        close(socketfd);
+                    }
+                }
+            }
         }
     }
     return 0;
 }
+
+
 
 int readField(int socketfd) {
 	char buffer[256] = {0};
