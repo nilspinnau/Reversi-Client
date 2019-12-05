@@ -92,21 +92,19 @@ int game(int socketfd) {
             bzero((char *) &buffer, sizeof(buffer));
         }
         else if (strstr(buffer, "+ MOVE %d") != NULL) {
-<<<<<<< HEAD
             char *ptr;
             int msec = 0, time = strtod(buffer,&ptr);
-            clock_t before = clock()
+            clock_t before = clock() - before;
             int iterations = 0;
-
             do {
                 clock_t difference = clock() - time;
                 msec = difference * 1000 / CLOCKS_PER_SEC;
                 iterations++;
             } while (msec < time);
-            
-=======
-            //int time = strtod(buffer);
->>>>>>> a99e0665efcb03e1cadc7722a1bf43677d4eedf8
+            if (msec == time) {
+                exit(0);
+            }
+
             read(socketfd, buffer, sizeof(buffer));
             bzero(buffer, sizeof(buffer));
         }
@@ -130,21 +128,12 @@ int readField(int socketfd) {
             break;
         }
 	}
-<<<<<<< HEAD
     read(socketfd, buffer, size);
     if(strstr(buffer, "+ ENDFIELD")) {
         write(socketfd, "THINKING\n\0", 10*sizeof(char));
     }
     
-=======
-    game(socketfd);
->>>>>>> a99e0665efcb03e1cadc7722a1bf43677d4eedf8
     // anstoß des thinkers per SIGUSR1
     //kill(shm->thinker, SIGUSR1);
 	return 0;
-<<<<<<< HEAD
 }
-=======
-}
-
->>>>>>> a99e0665efcb03e1cadc7722a1bf43677d4eedf8
