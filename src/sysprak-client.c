@@ -16,12 +16,14 @@
 #include "../lib/performConnection.h"
 #include "../lib/think.h"
 #include "../lib/shm.h"
+#include "../lib/getconfig.h"
 
 
+/*
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
-
+*/
 
 int main(int argc, char **argv) {
 
@@ -30,7 +32,13 @@ int main(int argc, char **argv) {
     char gameId[14];
     int playerNr;
 
-    while ((opt = getopt (argc, argv, "g:p:")) != -1) {
+    char path[256];
+    strcpy(path,"config.conf");
+    configs res;
+    configs* rp;
+    memset(&res,0,sizeof(configs));
+
+    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) {
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
@@ -48,17 +56,33 @@ int main(int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
                 break;
+            case 'f':
+                bzero((char*) &path, sizeof(path));
+                strcpy(path,optarg);
+                 
+                break;    
         }
     }
-    int sockfd, portno;
+   
+    rp = getconfig(&res,path);
+    if(rp == NULL){
+        printf("configfile err");
+        return 0;
+    }
+    printf("%s\n",rp->game_kind);
+    printf("%s\n",rp->host_name);
+    printf("%d\n",rp->port_nr);
+   
+    int sockfd;
+    //portno
     struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bzero((char* ) &serv_addr, sizeof(serv_addr));
-    portno = PORTNUMBER;
+    //portno = PORTNUMBER;
 
     struct hostent *server;
-    server = gethostbyname(HOSTNAME);
+    server = gethostbyname(rp->host_name);
     if (server == NULL) {
         perror("ERROR, no such host\n");
         exit(0);
@@ -68,7 +92,7 @@ int main(int argc, char **argv) {
     bcopy((char *)server->h_addr,
         (char *)&serv_addr.sin_addr.s_addr,
         server->h_length);
-    serv_addr.sin_port = htons(portno);
+    serv_addr.sin_port = htons(rp->port_nr);
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
         perror("ERROR connecting");
     }
