@@ -50,13 +50,16 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 					printf("C: PLAYER %d \n",playerNr);
                     bzero(buffer, sizeof(buffer));
                    
+             
                 } else if(strstr(buffer, "+ ENDFIELD")) {
                     write(socketfd, "THINKING\n", 9*sizeof(char));
                     printf("C: THINKING\n");
                     bzero(buffer, sizeof(buffer));
-
+   /*
                 } else if(strstr(buffer, "+ ENDPLAYERS")) {
+                   
                     exit(EXIT_SUCCESS);
+                    */
                 } 
                 bzero(buffer, sizeof(buffer));
                 break;       

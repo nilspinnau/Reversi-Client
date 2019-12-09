@@ -65,6 +65,7 @@ int readField() {
 
 //Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
 int game() {
+    
     if(isnext("+ MOVE")) {
         readField();
     } else if(isnext("+ WAIT")) {
