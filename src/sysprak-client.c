@@ -24,7 +24,8 @@ struct player {
 };
 
 struct sharedMemory {
-    //struct player p;
+    struct player p;
+    int spielFeld[8][8];
     char gameName[10];
     int playerNr;
     int playerCount;
@@ -145,6 +146,7 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         performConnection(sockfd,gameId,playerNr);
+        int readField(int sockfd);
         sm->thinker = getpid();
     }
 

@@ -7,7 +7,10 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
     char *version = "2.3";
     char buffer[256] = {0};
     int n = 0;
-
+    //char arrayTest[8][8];// loeschen
+    //char buffer[256] = {0};
+    //size_t size = sizeof(buffer);
+    
     while(recv(socketfd, buffer, sizeof(buffer), 0) != 0) {
         switch(buffer[0]) {
             case '+':
@@ -43,10 +46,28 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 		    		read(socketfd,buffer, sizeof(buffer));
                     int length = strlen(buffer);
 		    		printf("S: %.*s", length, buffer);
-	 	    		send(socketfd,"PLAYER\n",sizeof(char)*7,0);
-					printf("%d",playerNr);
                     bzero(buffer, sizeof(buffer));
-
+                    send(socketfd,"PLAYER\n",sizeof(char)*7, 0);
+					printf("C: PLAYER %d \n",playerNr);
+                    bzero(buffer, sizeof(buffer));
+                   
+                /*}else if (strstr(buffer, "+ FIELD 8,8") != NULL) {
+			        for(int i=0; i < 8; i++) {
+                    read(socketfd, buffer, size);
+                    strcpy(arrayTest[i],&buffer[1]); 
+                    printf("HI");
+                    printf("%s", arrayTest[i]);
+                    bzero(buffer, size);
+                }
+                
+                }else if(strstr(buffer, "+ YOU")){
+                    bzero(buffer,sizeof(buffer));
+                    read(socketfd,buffer,sizeof(buffer));
+                    int length = strlen(buffer);
+                    printf("S: %.*s",length, buffer );
+                    bzero(buffer,sizeof(buffer));
+                */
+                
                 } else if(strstr(buffer, "+ ENDFIELD")) {
                     write(socketfd, "THINKING\n", 9*sizeof(char));
                     printf("C: THINKING\n");
@@ -137,17 +158,24 @@ int game(int socketfd) {
 
 
 int readField(int socketfd) {
-	char buffer[256] = {0};
+	char arrayTest[9][9];// loeschen
+    char buffer[256] = {0};
     size_t size = sizeof(buffer);
+    
 	while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {
-		if(strstr(buffer, "+ ENDFIELD")) {
+		if(strstr(buffer, "+ ENDFIELD")!=0) {
                     write(socketfd, "THINKING\n", 9*sizeof(char));
                     bzero(buffer, sizeof(buffer));
         } else if (strstr(buffer, "+ FIELD 8,8") != NULL) {
 			for(int i=0; i < 8; i++) {
                 read(socketfd, buffer, size);
+                strcpy(arrayTest[i],&buffer[1]); 
+                
+                printf("%s", arrayTest[i]);
+                
                 bzero(buffer, size);
             }
+         
             break;
         }
 	}
