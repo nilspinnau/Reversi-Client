@@ -26,7 +26,7 @@ struct player {
 };
 
 struct sharedMemory {
-    //struct player p;
+    struct player p;
     char gameName[10];
     int playerNr;
     int playerCount;
@@ -42,7 +42,7 @@ struct sharedMemory {
 */
 
 char *buff;
-
+char field[8][8];
 
 int cleanExit(char *s) {
     free(buff);
@@ -50,15 +50,19 @@ int cleanExit(char *s) {
     return EXIT_FAILURE;
 }
 
-
 int readField() {
 	if(isnext("+ FIELD 8,8")) {
-        // speichere Feld
-        
+        for(int i=0;i<8;i++) {
+            char* line = getLine();
+            for(int j=0;j<8;j++) {
+                field[i][j] = line[j+1];
+            }
+        }
+        handler(SIGUSR1,field);
+
     } else {
         return cleanExit("isnext ist leer");
     }
-
     return 0;
 }
 
@@ -77,7 +81,6 @@ int game() {
     return 0;
 }
 
-
 int main(int argc, char **argv) {
 
     buff = malloc(256*8);
@@ -94,7 +97,7 @@ int main(int argc, char **argv) {
     configs* rp;
     memset(&res,0,sizeof(configs));
 
-    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) { 
+    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) {
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
@@ -104,22 +107,9 @@ int main(int argc, char **argv) {
                 else {
                 strcpy(gameId, optarg);
                 } 
-                break;
-            case 'p':
-                playerNr = atoi(optarg);
-                if (playerNr < 1 || playerNr > 2) {
-                	perror("Spieleranzahl 1 oder 2");
-					exit(EXIT_FAILURE);
-				}
-                break;
-            case 'f':
-                bzero((char*) &path, sizeof(path));
-                strcpy(path,optarg);
-                 
-                break;    
-        }
+                break;   
+                }
     }
-   
     rp = getconfig(&res,path);
     if(rp == NULL){
         printf("configfile err");
@@ -184,7 +174,7 @@ int main(int argc, char **argv) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think();
+        char *answer = think(field);
         write(fd[1], answer, sizeof(answer));
     }
     
