@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include <stdbool.h>
 #include <signal.h>
+#include <time.h>
 
 #include "../lib/signalHandler.h"
 #include "../lib/performConnection.h"
@@ -154,38 +155,6 @@ int game(int socketfd, struct sharedMemory *sm) {
 			send(socketfd,"OKWAIT\n\0",8*sizeof(char),0);
             bzero((char *) &buffer, sizeof(buffer));
         }
-        else if (strstr(buffer, "+ MOVE %d") != NULL) {
-            //timer to measure maximum length of a turn
-            char *ptr;
-            int msec = 0, time = strtod(buffer,&ptr);
-            clock_t before = clock();
-            int iterations = 0;
-            do {
-                clock_t difference = clock() - before;
-                msec = difference * 1000 / CLOCKS_PER_SEC;
-                iterations++;
-            } while (msec < time);
-            if (msec == time) {
-                exit(EXIT_FAILURE);
-            }
-            read(socketfd, buffer, sizeof(buffer));
-            //print out field state of given line and column
-            if (strstr(buffer, "+ ENDFIELD")) {
-                    write(socketfd, "THINKING\n", 9*sizeof(char));
-                    bzero(buffer, sizeof(buffer));
-            }
-            else if (strstr(buffer, "+ FIELD %d %d") != NULL) {
-                char *ptr;
-                int line = strtod(buffer,&ptr); 
-                int column = strtod(ptr,&ptr);
-                for (int i=0; i < line; i++) {
-                    for (int i=0; i < column; i++) {
-                        read(socketfd, buffer, sizeof(buffer));
-                        bzero(buffer, sizeof(buffer));
-                    }
-                }
-            }
-        }
         else if (strstr(buffer, "+ GAMEOVER") != NULL) {
             read(socketfd, buffer, sizeof(buffer));
             bzero(buffer, sizeof(buffer));
@@ -222,7 +191,7 @@ int readField(int socketfd, struct sharedMemory *sm) {
             bzero(buffer, size);
             for(int i = 0; i < 8; i++) {
                 read(socketfd, buffer, size);
-                
+
             }
         }
     }
