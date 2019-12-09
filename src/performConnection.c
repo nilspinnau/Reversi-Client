@@ -1,6 +1,4 @@
 #include "../lib/performConnection.h"
-#include "../lib/struct_H.h"
-#include <time.h>
 
 // vielleicht noch fehlerbehandlung von send bearbeiten
 int performConnection(int socketfd, char *gameId, int playerNr) {

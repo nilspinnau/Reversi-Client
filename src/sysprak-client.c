@@ -17,8 +17,22 @@
 #include "../lib/performConnection.h"
 #include "../lib/think.h"
 #include "../lib/getconfig.h"
-#include "../lib/struct_H.h"
+#include "../lib/handler.h"
 
+struct player {
+    int playerNr;
+    char playerName[10];
+    bool registered;
+};
+
+struct sharedMemory {
+    //struct player p;
+    char gameName[10];
+    int playerNr;
+    int playerCount;
+    pid_t thinker;
+    pid_t connector;
+};
 
 
 /*
@@ -27,7 +41,47 @@
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 */
 
+char *buff;
+
+
+int cleanExit(char *s) {
+    free(buff);
+    printf("%s\n", s);
+    return EXIT_FAILURE;
+}
+
+
+int readField() {
+	if(isnext("+ FIELD 8,8")) {
+        // speichere Feld
+        
+    } else {
+        return cleanExit("isnext ist leer");
+    }
+
+    return 0;
+}
+
+//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
+int game() {
+    if(isnext("+ MOVE")) {
+        readField();
+    } else if(isnext("+ WAIT")) {
+        toServer("OKWAIT\n");
+    } else if(isnext("+ GAMEOVER")) {
+        char *buff;
+        while((buff = getLine()) != NULL) {
+            printf("S: %s", buff);
+        }
+    }
+    return 0;
+}
+
+
 int main(int argc, char **argv) {
+
+    buff = malloc(256*8);
+    // alles drüber free()
 
     int opt;
     //char *gameId;
@@ -40,7 +94,7 @@ int main(int argc, char **argv) {
     configs* rp;
     memset(&res,0,sizeof(configs));
 
-    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) {
+    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) { 
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
@@ -80,6 +134,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    setSocket(sockfd, buff);
     bzero((char* ) &serv_addr, sizeof(serv_addr));
     //portno = PORTNUMBER;
 
@@ -98,14 +153,19 @@ int main(int argc, char **argv) {
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
         perror("ERROR connecting");
     }
+
+    printf("test\n");
     int fd[2];
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
-    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
-    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+    //struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    //int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
+    //sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+
     
+    printf("test\n");
+
     pid = fork();
     if (pid < 0) {
         perror ("Fehler bei fork().");
@@ -117,7 +177,7 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
-        sm->connector = getppid();
+        // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         signal(SIGUSR1, handler);
         if (ret_code < 0) {
@@ -134,72 +194,14 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        sm->thinker = getpid();
         performConnection(sockfd,gameId,playerNr);
+        readField(sockfd);
     }
 
     close(sockfd);
     return 0;
 }
 
-//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
-int game(int socketfd, struct sharedMemory *sm) {
-    char buffer[256] = {0};
-    while (recv(socketfd,buffer,sizeof(buffer),0) != 0) {
-        if (strstr(buffer, "+ ENDFIELD") != NULL) {
-            send(socketfd,"THINKING\n",9*sizeof(char),0);
-            bzero((char *) &buffer, sizeof(buffer));
-            kill(sm->connector, SIGUSR1);
-        }
-        else if (strstr(buffer, "+ WAIT") != NULL) {
-			send(socketfd,"OKWAIT\n\0",8*sizeof(char),0);
-            bzero((char *) &buffer, sizeof(buffer));
-        }
-        else if (strstr(buffer, "+ GAMEOVER") != NULL) {
-            read(socketfd, buffer, sizeof(buffer));
-            bzero(buffer, sizeof(buffer));
-            if (strstr(buffer, "+ FIELD %d %d") != NULL) {
-                char *ptr;
-                int line = strtod(buffer,&ptr); 
-                int column = strtod(ptr,&ptr);
-                for (int i=0; i < line; i++) {
-                    for (int i=0; i < column; i++) {
-                        read(socketfd, buffer, sizeof(buffer));
-                        bzero(buffer, sizeof(buffer));
-                    }
-                }
-                if (strstr(buffer, "+ ENDFIELD") != NULL) {
-                    read(socketfd, buffer, sizeof(buffer));
-                    bzero(buffer, sizeof(buffer));
-                    if (strstr(buffer, "+ QUIT") != NULL) {
-                        close(socketfd);
-                    }
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-
-
-int readField(int socketfd, struct sharedMemory *sm) {
-	char buffer[256] = {0};
-    size_t size = sizeof(buffer);
-	while(read(socketfd, buffer, size)) {
-        if(strstr(buffer, "+ FIELD 8,8")) {
-            bzero(buffer, size);
-            for(int i = 0; i < 8; i++) {
-                read(socketfd, buffer, size);
-
-            }
-        }
-    }
-    game(socketfd, sm);
-    // anstoß des thinkers per SIGUSR1
-    //kill(shm->thinker, SIGUSR1);
-	return 0;
-}
 
 
 
