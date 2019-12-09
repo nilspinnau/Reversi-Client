@@ -44,8 +44,8 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                     int length = strlen(buffer);
 		    		printf("S: %.*s", length, buffer);
 	 	    		send(socketfd,"PLAYER\n",sizeof(char)*7,0);
-					printf("%d",playerNr);
-                    bzero(buffer, sizeof(buffer));
+					printf("C: PLAYER %d \n",playerNr);
+                    //bzero(buffer, sizeof(buffer));
 
                 } else if(strstr(buffer, "+ ENDFIELD")) {
                     write(socketfd, "THINKING\n", 9*sizeof(char));
