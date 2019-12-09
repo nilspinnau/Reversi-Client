@@ -6,7 +6,10 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
     char *version = "2.3";
     char buffer[256] = {0};
     int n = 0;
-
+    //char arrayTest[8][8];// loeschen
+    //char buffer[256] = {0};
+    //size_t size = sizeof(buffer);
+    
     while(recv(socketfd, buffer, sizeof(buffer), 0) != 0) {
         switch(buffer[0]) {
             case '+':
@@ -42,12 +45,21 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
 		    		read(socketfd,buffer, sizeof(buffer));
                     int length = strlen(buffer);
 		    		printf("S: %.*s", length, buffer);
-	 	    		send(socketfd,"PLAYER\n",sizeof(char)*7,0);
-					printf("%d",playerNr);
                     bzero(buffer, sizeof(buffer));
-
+                    send(socketfd,"PLAYER\n",sizeof(char)*7, 0);
+					printf("C: PLAYER %d \n",playerNr);
+                    bzero(buffer, sizeof(buffer));
+                   
+             
+                } else if(strstr(buffer, "+ ENDFIELD")) {
+                    write(socketfd, "THINKING\n", 9*sizeof(char));
+                    printf("C: THINKING\n");
+                    bzero(buffer, sizeof(buffer));
+   /*
                 } else if(strstr(buffer, "+ ENDPLAYERS")) {
+                   
                     exit(EXIT_SUCCESS);
+                    */
                 } 
                 bzero(buffer, sizeof(buffer));
                 break;       
