@@ -197,12 +197,12 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         performConnection(sockfd,gameId,playerNr);
-        readField(sockfd);
+        readField();
     }
 
     close(sockfd);
     return 0;
-}
+}   
 
 
 
