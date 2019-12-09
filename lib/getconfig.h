@@ -1,7 +1,7 @@
-    typedef struct {
-        char game_kind[10];
-        char host_name[35];
-        unsigned short port_nr;
-    }configs;
+typedef struct {
+    char game_kind[10];
+    char host_name[35];
+    unsigned short port_nr;
+}configs;
 
-    configs *getconfig(configs* res, char * path); 
+configs *getconfig(configs* res, char * path); 

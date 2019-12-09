@@ -11,11 +11,13 @@
 #include <sys/wait.h>
 #include <stdbool.h>
 #include <signal.h>
+#include <time.h>
 
 #include "../lib/signalHandler.h"
 #include "../lib/performConnection.h"
 #include "../lib/think.h"
 #include "../lib/getconfig.h"
+#include "../lib/handler.h"
 
 struct player {
     int playerNr;
@@ -33,13 +35,54 @@ struct sharedMemory {
     pid_t connector;
 };
 
+
 /*
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 */
 
+char *buff;
+
+
+int cleanExit(char *s) {
+    free(buff);
+    printf("%s\n", s);
+    return EXIT_FAILURE;
+}
+
+
+int readField() {
+	if(isnext("+ FIELD 8,8")) {
+        // speichere Feld
+        
+    } else {
+        return cleanExit("isnext ist leer");
+    }
+
+    return 0;
+}
+
+//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
+int game() {
+    if(isnext("+ MOVE")) {
+        readField();
+    } else if(isnext("+ WAIT")) {
+        toServer("OKWAIT\n");
+    } else if(isnext("+ GAMEOVER")) {
+        char *buff;
+        while((buff = getLine()) != NULL) {
+            printf("S: %s", buff);
+        }
+    }
+    return 0;
+}
+
+
 int main(int argc, char **argv) {
+
+    buff = malloc(256*8);
+    // alles drüber free()
 
     int opt;
     //char *gameId;
@@ -52,7 +95,7 @@ int main(int argc, char **argv) {
     configs* rp;
     memset(&res,0,sizeof(configs));
 
-    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) {
+    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) { 
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
@@ -92,6 +135,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    setSocket(sockfd, buff);
     bzero((char* ) &serv_addr, sizeof(serv_addr));
     //portno = PORTNUMBER;
 
@@ -110,14 +154,19 @@ int main(int argc, char **argv) {
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
         perror("ERROR connecting");
     }
+
+    printf("test\n");
     int fd[2];
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
-    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
-    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+    //struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    //int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
+    //sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+
     
+    printf("test\n");
+
     pid = fork();
     if (pid < 0) {
         perror ("Fehler bei fork().");
@@ -129,6 +178,7 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
+        // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         signal(SIGUSR1, handler);
         if (ret_code < 0) {
@@ -146,12 +196,13 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         performConnection(sockfd,gameId,playerNr);
-        int readField(int sockfd);
-        sm->thinker = getpid();
+        readField(sockfd);
     }
 
     close(sockfd);
     return 0;
 }
+
+
 
 
