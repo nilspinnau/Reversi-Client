@@ -52,8 +52,10 @@ int cleanExit(char *s) {
 }
 
 
-int readField() {
-	if(isnext("+ FIELD 8,8")) {
+int readField(int sf) {
+	bool equal = false;
+    isnext(sf, &equal, "+ FIELD 8,8");
+    if(equal) {
         // speichere Feld
         
     } else {
@@ -64,17 +66,22 @@ int readField() {
 }
 
 //Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
-int game() {
-    
-    if(isnext("+ MOVE")) {
-        readField();
-    } else if(isnext("+ WAIT")) {
+int game(int sf, pid_t pid) {
+    if(isNext(sf, "+ MOVE")) {
+        readField(sf);
+    } else if(isNext(sf, "+ WAIT")) {
         toServer("OKWAIT\n");
-    } else if(isnext("+ GAMEOVER")) {
-        char *buff;
-        while((buff = getLine()) != NULL) {
+    } else if(isNext(sf, "+ GAMEOVER")) {
+        char *buff = malloc(256*8);
+        getLine(sf, buff);
+        while(buff != NULL) {
             printf("S: %s", buff);
+            getLine(sf, buff);
         }
+        free(buff);
+    } else if(strstr(buff, "ENDFIELD")) {
+        write(sf, "THINKING\n", 9*8);
+        kill(pid, SIGUSR1);
     }
     return 0;
 }
@@ -126,10 +133,10 @@ int main(int argc, char **argv) {
     if(rp == NULL){
         printf("configfile err");
         return 0;
-    }
+    }/* 
     printf("%s\n",rp->game_kind);
     printf("%s\n",rp->host_name);
-    printf("%d\n",rp->port_nr);
+    printf("%d\n",rp->port_nr); */
    
     int sockfd;
     //portno
@@ -165,8 +172,6 @@ int main(int argc, char **argv) {
     //int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
     //sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
 
-    
-    printf("test\n");
 
     pid = fork();
     if (pid < 0) {
@@ -197,7 +202,10 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         performConnection(sockfd,gameId,playerNr);
-        readField();
+        /* while(true) {
+            readField(sockfd);
+            game(sockfd, sm->ppid);
+        } */
     }
 
     close(sockfd);

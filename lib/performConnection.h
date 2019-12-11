@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "../lib/handler.h"
+
 // Prolog Phase der Kommunikation
 // Zuweisung eines freien Spielers durch Gameserver
 // @param int socketfd: FIle-Deskriptor des Sockets

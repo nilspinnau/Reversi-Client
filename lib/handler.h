@@ -9,9 +9,19 @@
 
 
 void setSocket(int socketfd, char *buff);
+/* 
+bool isnext(char *s); */
 
-bool isnext(char *s);
-
-char *getLine();
-
+/* char *getLine();
+ */
 void  toServer(char *s);
+
+void twoServer(int socketfd, char *s1, char *s2);
+
+void getLine(int sf, char *buffer);
+
+void line(int socketfd);
+
+void isnext(int sf, bool *rt, char *s);
+
+bool isNext(int sf, char *s);
