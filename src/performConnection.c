@@ -1,74 +1,38 @@
 #include "../lib/performConnection.h"
+#include "../lib/handler.h"
 
 // vielleicht noch fehlerbehandlung von send bearbeiten
-int performConnection(int socketfd, char *gameId, int playerNr) {
+bool performConnection(int socketfd, char *gameId, int playerNr) {
 
-    char *version = "2.3";
-    char buffer[256] = {0};
-    int n = 0;
-    //char arrayTest[8][8];// loeschen
-    //char buffer[256] = {0};
-    //size_t size = sizeof(buffer);
-    
-    while(recv(socketfd, buffer, sizeof(buffer), 0) != 0) {
-        switch(buffer[0]) {
-            case '+':
-                n = strlen(buffer);
-                printf("S: %.*s", n, buffer);
-
-                if(strstr(buffer, "+ MNM Gameserver")) {
-                    // sending client id/version
-		    
-                    bzero(buffer, sizeof(buffer));
-                    sprintf(buffer, "VERSION %s%s", version, "\n\0");
-                    char answer[strlen(buffer)];
-		            strncpy(answer,buffer,strlen(buffer));
-                    send(socketfd, answer, sizeof(answer), 0);
-                    printf("C: %s", answer);
-                    bzero(buffer, sizeof(buffer));
-                    bzero(answer, sizeof(answer));
-                } else if(strstr(buffer, "+ Client version accepted - please send Game-ID to join") != NULL) {
-					// sending GameId
-
-                    bzero(buffer, sizeof(buffer));
-                    sprintf(buffer, "ID %s%s", gameId, "\n\0");
-                    char answer[strlen(buffer)];
-		    		strncpy(answer,buffer,strlen(buffer));
-                    send(socketfd, answer, sizeof(answer), 0);
-                    printf("C: %s", answer);
-                    bzero(buffer, sizeof(buffer));
-                    bzero(answer, sizeof(answer));
-                
-                } else if(strstr(buffer, "+ PLAYING")) {
-
-                    bzero(buffer, sizeof(buffer));
-		    		read(socketfd,buffer, sizeof(buffer));
-                    int length = strlen(buffer);
-		    		printf("S: %.*s", length, buffer);
-                    bzero(buffer, sizeof(buffer));
-                    send(socketfd,"PLAYER\n",sizeof(char)*7, 0);
-					printf("C: PLAYER %d \n",playerNr);
-                    bzero(buffer, sizeof(buffer));
-                   
-             
-                } else if(strstr(buffer, "+ ENDFIELD")) {
-                    write(socketfd, "THINKING\n", 9*sizeof(char));
-                    printf("C: THINKING\n");
-                    bzero(buffer, sizeof(buffer));
-   /*
-                } else if(strstr(buffer, "+ ENDPLAYERS")) {
-                   
-                    exit(EXIT_SUCCESS);
-                    */
-                } 
-                bzero(buffer, sizeof(buffer));
-                break;       
-            default:
-                // disconnect, error message from server
-                printf("S: %s", buffer);            
-                close(socketfd);
-                exit(EXIT_FAILURE);
+    setSocket(socketfd);
+    if(isnext("+ MNM Gameserver v2.3 accepting connections\n")){
+        toServer("VERSION 2.3\n");
+        if(isnext("+ Client version accepted - please send Game-ID to join\n")){
+            threeServer("ID ", gameId, "\n");
+            if(isnext("+ PLAYING Reversi\n")){
+                getLine();
+                if(playerNr == 1) toServer("PLAYER 1\n");
+                else toServer("PLAYER 0\n");
+                if(isnext("- No free player\n")){
+                    printf("no Playerspot availiable");
+                    return false;
+                }
+                getLine();
+            }
+            else{
+                printf("Game ID not Accepted");
+                return false;
+            }
+        }
+        else{
+            printf("Version not Accepted");
+            return false;
         }
     }
-    exit(EXIT_SUCCESS);
+    else{
+        printf("Server not responding");
+        return false;
+    }
+
+    return true;
 }

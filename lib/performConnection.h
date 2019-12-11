@@ -4,8 +4,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 // Prolog Phase der Kommunikation
 // Zuweisung eines freien Spielers durch Gameserver
 // @param int socketfd: FIle-Deskriptor des Sockets
-int performConnection(int socketfd, char *gameId, int playerNr);
+bool performConnection(int socketfd, char *gameId, int playerNr);

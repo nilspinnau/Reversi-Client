@@ -42,27 +42,45 @@ struct sharedMemory {
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 */
 
-char *buff;
+char *loopbuffer;
 
-
-int cleanExit(char *s) {
-    free(buff);
-    printf("%s\n", s);
-    return EXIT_FAILURE;
-}
-
-
+//readfield error handle?
 int readField() {
 	if(isnext("+ FIELD 8,8")) {
         // speichere Feld
         
     } else {
-        return cleanExit("isnext ist leer");
+        return cleanExit("Wrong Field from Server");
     }
-
     return 0;
 }
 
+void gameloop(){
+    bool exit = false;
+    //only when player 2 (Beginner)to test:
+    //toServer("THINKING\n");
+    while(!exit){
+        loopbuffer = getLine();
+        if(strcmp(loopbuffer,"+ WAIT\n") == 0){
+            toServer("OKWAIT\n");
+        }
+        if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
+            readField();
+            //handle who is winner
+            break;
+        }
+        if(strcmp(loopbuffer,"- TIMEOUT Be faster next time\n") == 0){
+            printf("Timeout -> Exiting Programm");
+            break;
+        }
+        if(strncmp(loopbuffer,"+ MOVE ",7) == 0){
+            readField();
+            //thinker anstoßen
+        }        
+    }
+
+}
+/*
 //Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
 int game() {
     
@@ -78,11 +96,12 @@ int game() {
     }
     return 0;
 }
-
+*/
 
 int main(int argc, char **argv) {
 
-    buff = malloc(256*8);
+    init();
+    //buff = malloc(256*8);
     // alles drüber free()
 
     int opt;
@@ -115,7 +134,7 @@ int main(int argc, char **argv) {
 				}
                 break;
             case 'f':
-                bzero((char*) &path, sizeof(path));
+                //bzero((char*) &path, sizeof(path));
                 strcpy(path,optarg);
                  
                 break;    
@@ -136,7 +155,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    setSocket(sockfd, buff);
+    setSocket(sockfd);
     bzero((char* ) &serv_addr, sizeof(serv_addr));
     //portno = PORTNUMBER;
 
@@ -196,7 +215,8 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        performConnection(sockfd,gameId,playerNr);
+        if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
+        gameloop();
         readField();
     }
 
