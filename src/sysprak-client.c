@@ -34,6 +34,26 @@ struct sharedMemory {
     pid_t connector;
 };
 
+struct field {
+    int width;
+    int height;
+    char field[8][8];
+};
+
+struct field field;
+
+void remove_spaces(char *str) { 
+    // To keep track of non-space character count 
+    int count = 0; 
+  
+    // Traverse the given string. If current character 
+    // is not space, then place it at index 'count++' 
+    for (int i = 0; str[i]; i++) 
+        if (str[i] != ' ') 
+            str[count++] = str[i]; // here count is 
+                                   // incremented 
+    str[count] = '\0'; 
+} 
 
 /*
 #define GAMEKINDNAME "Reversi"
@@ -41,50 +61,83 @@ struct sharedMemory {
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 */
 
-char *buff;
-char field[8][8];
-
-int cleanExit(char *s) {
-    free(buff);
-    printf("%s\n", s);
-    return EXIT_FAILURE;
-}
-
+char *loopbuffer;
+//readfield error handle?
+// ab TOTAL 2 von Server kommt Feld und alles in einer Nachricht, weil nur einmal S: ...
+// Frage hier also: wie liest man Feld aus dem buffer raus
 int readField() {
-	if(isnext("+ TOTAL")) {
-        for(int i=0;i<8;i++) {
-            char* line = getLine();
-            for(int j=0;j<8;j++) {
-                field[i][j] = line[j+1];
+    char *line;
+    loopbuffer = getLine();
+    while (strtok(loopbuffer,"\n")!= NULL) {
+        if (!strcmp(loopbuffer, "+ FIELD 8,8")) {
+            remove_spaces(loopbuffer);
+            field.width = 8;
+            field.height = 8;
+            field.field = malloc(field.width*field.height*sizeof(char));
+            for (int i = 0; i < field.height; i++) {
+                line = strtok(loopbuffer, "\n");
+                for (int j = 0; j < field.width; j++)  {
+                    strcpy(field.field[i][j],line[j+2]);
+                }
             }
         }
-        handler(SIGUSR1,field);
-
-    } else {
-        return cleanExit("isnext ist leer");
+        // printf("%s",field.field);
     }
     return 0;
 }
 
-//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
-int game() {
-    
-    if(isnext("+ MOVE")) {
-        readField();
-    } else if(isnext("+ WAIT")) {
-        toServer("OKWAIT\n");
-    } else if(isnext("+ GAMEOVER")) {
-        char *buff;
-        while((buff = getLine()) != NULL) {
-            printf("S: %s", buff);
+void gameloop(){
+    bool exit = false;
+    //only when player 2 for testing test:
+    //toServer("THINKING\n");
+    while(!exit){
+        loopbuffer = getLine();
+        if(strcmp(loopbuffer,"+ WAIT\n") == 0){
+            toServer("OKWAIT\n");
         }
+        if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
+            readField();
+            //handle who is winner
+            break;
+        }
+        if(strcmp(loopbuffer,"- TIMEOUT Be faster next time\n") == 0){
+            printf("Timeout -> Exiting Programm");
+            break;
+        }
+        if(strcmp(loopbuffer,"+ ") == 0){
+            readField();
+            //thinker anstoßen
+        }        
+    }
+
+}
+/*
+//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
+int game(int sf, pid_t pid) {
+    if(isNext(sf, "+ MOVE")) {
+        readField(sf);
+    } else if(isNext(sf, "+ WAIT")) {
+        toServer("OKWAIT\n");
+    } else if(isNext(sf, "+ GAMEOVER")) {
+        char *buff = malloc(256*8);
+        getLine(sf, buff);
+        while(buff != NULL) {
+            printf("S: %s", buff);
+            getLine(sf, buff);
+        }
+        free(buff);
+    } else if(strstr(buff, "ENDFIELD")) {
+        write(sf, "THINKING\n", 9*8);
+        kill(pid, SIGUSR1);
     }
     return 0;
 }
+*/
 
 int main(int argc, char **argv) {
 
-    buff = malloc(256*8);
+    init();
+    //buff = malloc(256*8);
     // alles drüber free()
 
     int opt;
@@ -108,24 +161,36 @@ int main(int argc, char **argv) {
                 else {
                 strcpy(gameId, optarg);
                 } 
-                break;   
-                }
+                break;
+            case 'p':
+                playerNr = atoi(optarg);
+                if (playerNr < 1 || playerNr > 2) {
+                	perror("Spieleranzahl 1 oder 2");
+					exit(EXIT_FAILURE);
+				}
+                break;
+            case 'f':
+                //bzero((char*) &path, sizeof(path));
+                strcpy(path,optarg);
+                 
+                break;    
+        }
     }
     rp = getconfig(&res,path);
     if(rp == NULL){
         printf("configfile err");
         return 0;
-    }
+    }/* 
     printf("%s\n",rp->game_kind);
     printf("%s\n",rp->host_name);
-    printf("%d\n",rp->port_nr);
+    printf("%d\n",rp->port_nr); */
    
     int sockfd;
     //portno
     struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    setSocket(sockfd, buff);
+    setSocket(sockfd);
     bzero((char* ) &serv_addr, sizeof(serv_addr));
     //portno = PORTNUMBER;
 
@@ -168,6 +233,7 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
+        sm->thinker = getppid();
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         // signal(SIGUSR1, handler);
@@ -185,7 +251,9 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        performConnection(sockfd,gameId,playerNr);
+        if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
+        sm->connector = getpid();
+        gameloop();
         readField();
         sm->connector = getpid();
     }
@@ -193,7 +261,6 @@ int main(int argc, char **argv) {
     close(sockfd);
     return 0;
 }   
-
 
 
 
