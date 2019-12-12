@@ -1,5 +1,5 @@
 #include "../lib/think.h"
 
 char *think(){
-  return "E6" ;
+  return "E6";
 }

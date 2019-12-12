@@ -45,6 +45,8 @@ struct sharedMemory {
 char *loopbuffer;
 
 //readfield error handle?
+// ab TOTAL 2 von Server kommt Feld und alles in einer Nachricht, weil nur einmal S: ...
+// Frage hier also: wie liest man Feld aus dem buffer raus
 int readField() {
 	if(isnext("+ FIELD 8,8")) {
         // speichere Feld
@@ -73,7 +75,7 @@ void gameloop(){
             printf("Timeout -> Exiting Programm");
             break;
         }
-        if(strncmp(loopbuffer,"+ MOVE ",7) == 0){
+        if(strcmp(loopbuffer,"+ ") == 0){
             readField();
             //thinker anstoßen
         }        
@@ -185,9 +187,9 @@ int main(int argc, char **argv) {
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
-    //struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    //int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
-    //sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory), IPC_CREAT | 0666);
+    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
 
 
     pid = fork();
@@ -201,6 +203,7 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
+        sm->thinker = getppid();
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         signal(SIGUSR1, handler);
@@ -219,6 +222,7 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
+        sm->connector = getpid();
         gameloop();
         readField();
     }
