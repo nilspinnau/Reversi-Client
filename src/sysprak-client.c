@@ -19,15 +19,22 @@
 #include "../lib/getconfig.h"
 #include "../lib/handler.h"
 
+extern char buff[256];
+
 struct player {
     int playerNr;
     char playerName[10];
     bool registered;
 };
+struct spielFeld{
+    int width;
+    int height; 
+    char Feld[8][8];
+};
 
 struct sharedMemory {
     struct player p;
-    int spielFeld[8][8];
+    struct spielFeld field; 
     char gameName[10];
     int playerNr;
     int playerCount;
@@ -35,7 +42,7 @@ struct sharedMemory {
     pid_t connector;
 };
 
-
+struct spielFeld field;
 /*
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
@@ -44,14 +51,32 @@ struct sharedMemory {
 
 char *loopbuffer;
 
+
 //readfield error handle?
-int readField() {
-	if(isnext("+ FIELD 8,8")) {
-        // speichere Feld
-        
-    } else {
-        return cleanExit("Wrong Field from Server");
+ 
+int readField(char *buffer) {
+    char* line ;
+    printf("hello: %s", buffer);
+    //loopbuffer = getLine();
+    while ( (line=strtok(buffer,"\n")) != NULL){
+       buffer = NULL; // strtok wird beim nächste Mal mit NULL aufgerufen
+       int row = line[2] -'1';
+       sscanf(line, "+ %*i %c %c %c %c %c %c %c %c", 
+       &field.Feld[row][0],&field.Feld[row][1],&field.Feld[row][2],
+       &field.Feld[row][3],&field.Feld[row][4],&field.Feld[row][5],
+       &field.Feld[row][6],&field.Feld[row][7]);
     }
+    
+    for(int i=0; i<8; i++){
+        for(int j=0; j<8;j++){
+       printf("%c", field.Feld[i][j]);
+    }
+        printf("\n");
+       }
+    
+        
+ 
+    
     return 0;
 }
 
@@ -65,7 +90,7 @@ void gameloop(){
             toServer("OKWAIT\n");
         }
         if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
-            readField();
+            readField(buff);
             //handle who is winner
             break;
         }
@@ -74,7 +99,7 @@ void gameloop(){
             break;
         }
         if(strncmp(loopbuffer,"+ MOVE ",7) == 0){
-            readField();
+            readField(buff);
             //thinker anstoßen
         }        
     }
@@ -219,8 +244,11 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
+        readField(buff);
+        printf("Hi\n");
         gameloop();
-        readField();
+        //readField();
+         printf("Hi\n");
     }
 
     close(sockfd);
