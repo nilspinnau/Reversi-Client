@@ -231,7 +231,8 @@ int main(int argc, char **argv) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think(field);
+        //char *answer = think(field);
+        char *answer = "MOVE E6\n";
         write(fd[1], answer, sizeof(answer));
     }
     
