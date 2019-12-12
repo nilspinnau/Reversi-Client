@@ -51,7 +51,7 @@ int cleanExit(char *s) {
 }
 
 int readField() {
-	if(isnext("+ FIELD 8,8")) {
+	if(isnext("+ TOTAL")) {
         for(int i=0;i<8;i++) {
             char* line = getLine();
             for(int j=0;j<8;j++) {
@@ -150,10 +150,10 @@ int main(int argc, char **argv) {
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
-    //struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    //int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
-    //sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
-
+    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
+    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+    printf ("shared memory attached at address %p\n", sm);
     
     printf("test\n");
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
         close(fd[0]);
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
-        signal(SIGUSR1, handler);
+        // signal(SIGUSR1, handler);
         if (ret_code < 0) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
@@ -187,6 +187,7 @@ int main(int argc, char **argv) {
         close(fd[1]);
         performConnection(sockfd,gameId,playerNr);
         readField();
+        sm->connector = getpid();
     }
 
     close(sockfd);
