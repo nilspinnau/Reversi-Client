@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     configs* rp;
     memset(&res,0,sizeof(configs));
 
-    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) { 
+    while ((opt = getopt (argc, argv, "g:p:f:")) != -1) {
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
@@ -166,7 +166,6 @@ int main(int argc, char **argv) {
                 break;    
         }
     }
-   
     rp = getconfig(&res,path);
     if(rp == NULL){
         printf("configfile err");
@@ -206,10 +205,12 @@ int main(int argc, char **argv) {
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
-    //struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    //int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
-    //sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
-
+    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
+    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
+    printf ("shared memory attached at address %p\n", sm);
+    
+    printf("test\n");
 
     pid = fork();
     if (pid < 0) {
@@ -222,14 +223,15 @@ int main(int argc, char **argv) {
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
+        sm->thinker = getppid();
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
-        signal(SIGUSR1, handler);
+        // signal(SIGUSR1, handler);
         if (ret_code < 0) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think();
+        char *answer = think(field);
         write(fd[1], answer, sizeof(answer));
     }
     
@@ -250,7 +252,6 @@ int main(int argc, char **argv) {
     close(sockfd);
     return 0;
 }   
-
 
 
 
