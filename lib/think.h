@@ -1,1 +1,1 @@
-char*think(char *field);
+char *think(char field[8][8]);

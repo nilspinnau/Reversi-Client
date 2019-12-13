@@ -77,11 +77,10 @@ int readField() {
             for (int i = 0; i < field.height; i++) {
                 line = strtok(loopbuffer, "\n");
                 for (int j = 0; j < field.width; j++)  {
-                    strcpy(field.field[i][j],line[j+2]);
+                    strcpy(field.field[i],line);
                 }
             }
         }
-        // printf("%s",field.field);
     }
     return 0;
 }
@@ -241,7 +240,7 @@ int main(int argc, char **argv) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think(field);
+        char *answer = think(field.field);
         write(fd[1], answer, sizeof(answer));
     }
     
