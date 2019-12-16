@@ -1,1 +1,2 @@
-char *think(char field[8][8]);
+#include "../lib/struct_H.h"
+char *think(sharedMemory *sm);

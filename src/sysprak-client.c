@@ -17,41 +17,19 @@
 #include "../lib/performConnection.h"
 #include "../lib/think.h"
 #include "../lib/getconfig.h"
+#include "../lib/struct_H.h"
 #include "../lib/handler.h"
 
-struct player {
-    int playerNr;
-    char playerName[10];
-    bool registered;
-};
+struct spielFeld field;
 
-struct sharedMemory {
-    struct player p;
-    char gameName[10];
-    int playerNr;
-    int playerCount;
-    pid_t thinker;
-    pid_t connector;
-};
+extern char buff[256];
 
-struct field {
-    int width;
-    int height;
-    char field[8][8];
-};
-
-struct field field;
-
+//Hilfsfunktion um Leerzeichen aus der Servernachricht zu loeschen
 void remove_spaces(char *str) { 
-    // To keep track of non-space character count 
     int count = 0; 
-  
-    // Traverse the given string. If current character 
-    // is not space, then place it at index 'count++' 
     for (int i = 0; str[i]; i++) 
         if (str[i] != ' ') 
-            str[count++] = str[i]; // here count is 
-                                   // incremented 
+            str[count++] = str[i]; 
     str[count] = '\0'; 
 } 
 
@@ -65,25 +43,28 @@ char *loopbuffer;
 //readfield error handle?
 // ab TOTAL 2 von Server kommt Feld und alles in einer Nachricht, weil nur einmal S: ...
 // Frage hier also: wie liest man Feld aus dem buffer raus
-int readField() {
-    char *line;
-    loopbuffer = getLine();
-    while (strtok(loopbuffer,"\n")!= NULL) {
-        if (!strcmp(loopbuffer, "+ FIELD 8,8")) {
-            remove_spaces(loopbuffer);
-            field.width = 8;
-            field.height = 8;
-            field.field = malloc(field.width*field.height*sizeof(char));
-            for (int i = 0; i < field.height; i++) {
-                line = strtok(loopbuffer, "\n");
-                for (int j = 0; j < field.width; j++)  {
-                    strcpy(field.field[i],line);
-                }
-            }
-        }
+int readField(char *buffer) {
+    char* line ;
+    printf("hello: %s", buffer);
+    //loopbuffer = getLine();
+    while ( (line=strtok(buffer,"\n")) != NULL){
+       buffer = NULL; // strtok wird beim nächste Mal mit NULL aufgerufen
+       int row = line[2] -'1';
+       sscanf(line, "+ %*i %c %c %c %c %c %c %c %c", 
+       &field.Feld[row][0],&field.Feld[row][1],&field.Feld[row][2],
+       &field.Feld[row][3],&field.Feld[row][4],&field.Feld[row][5],
+       &field.Feld[row][6],&field.Feld[row][7]);
     }
-    return 0;
+    
+    for(int i=0; i<8; i++){
+        for(int j=0; j<8;j++){
+       printf("%c", field.Feld[i][j]);
+    }
+        printf("\n");
+       }
+     return 0;
 }
+
 
 void gameloop(){
     bool exit = false;
@@ -95,7 +76,7 @@ void gameloop(){
             toServer("OKWAIT\n");
         }
         if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
-            readField();
+            readField(buff);
             //handle who is winner
             break;
         }
@@ -103,35 +84,14 @@ void gameloop(){
             printf("Timeout -> Exiting Programm");
             break;
         }
-        if(strcmp(loopbuffer,"+ ") == 0){
-            readField();
+        if(strcmp(loopbuffer,"+ ENDFIELD") == 0){
+            toServer("THINKING\n");
+            readField(buff);
             //thinker anstoßen
         }        
     }
 
 }
-/*
-//Spielverlauf, Feld auslesen, Gewinner ausgeben, Quit
-int game(int sf, pid_t pid) {
-    if(isNext(sf, "+ MOVE")) {
-        readField(sf);
-    } else if(isNext(sf, "+ WAIT")) {
-        toServer("OKWAIT\n");
-    } else if(isNext(sf, "+ GAMEOVER")) {
-        char *buff = malloc(256*8);
-        getLine(sf, buff);
-        while(buff != NULL) {
-            printf("S: %s", buff);
-            getLine(sf, buff);
-        }
-        free(buff);
-    } else if(strstr(buff, "ENDFIELD")) {
-        write(sf, "THINKING\n", 9*8);
-        kill(pid, SIGUSR1);
-    }
-    return 0;
-}
-*/
 
 int main(int argc, char **argv) {
 
@@ -233,6 +193,7 @@ int main(int argc, char **argv) {
         // READSEITE der Pipe schliessen
         close(fd[0]);
         sm->thinker = getppid();
+        sm->feld = field;
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         // signal(SIGUSR1, handler);
@@ -240,7 +201,7 @@ int main(int argc, char **argv) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think(field.field);
+        char *answer = think(sm);
         write(fd[1], answer, sizeof(answer));
     }
     
@@ -253,7 +214,7 @@ int main(int argc, char **argv) {
         if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
         sm->connector = getpid();
         gameloop();
-        readField();
+        readField(buff);
         sm->connector = getpid();
     }
 
