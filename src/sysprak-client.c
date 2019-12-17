@@ -27,9 +27,11 @@ struct player {
 
 struct sharedMemory {
     struct player p;
-    int spielFeld[8][8];
+    char spielFeld[8][8];
     char gameName[10];
-    int playerNr;
+    char response[3];
+    char playerName[20];
+    int myplayerNr;
     int playerCount;
     pid_t thinker;
     pid_t connector;
@@ -43,24 +45,48 @@ struct sharedMemory {
 */
 
 char *loopbuffer;
+char playerName[20];// durch shared memory sm-> playerName ersetzt!
+int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
+char spielFeld[8][8];// durch shared memory sm-> spielFeld ersetzt!
 
 //readfield error handle?
-int readField() {
-	if(isnext("+ FIELD 8,8")) {
-        // speichere Feld
-        
-    } else {
-        return cleanExit("Wrong Field from Server");
+bool readField() {
+    if(strcmp(loopbuffer,"+ FIELD 8,8")!=0)return false;
+    
+    for(int row = 0;row < 8;row++){
+        loopbuffer = nextbufLine();
+        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",&spielFeld[row][0],&spielFeld[row][1],&spielFeld[row][2],&spielFeld[row][3],&spielFeld[row][4],&spielFeld[row][5],&spielFeld[row][6],&spielFeld[row][7]);
     }
-    return 0;
+    loopbuffer = nextbufLine();
+    if(strcmp(loopbuffer,"+ ENDFIELD")!=0)return false;
+    return true;
 }
 
+bool setPlayer(){
+    loopbuffer = getbuffer();
+    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&myplayerNr)!= 1)return false;// durch shared memory sm-> myplayerNr ersetzt!
+    getLine();// Line Total 2 .. Endplayer .. Field/wait
+    loopbuffer = nextbufLine();
+    if(strcmp(loopbuffer,"+ TOTAL 2")!=0)return false;
+       loopbuffer = nextbufLine();
+    if(sscanf(loopbuffer,"+ %*d %s player %*d",playerName)!= 1)return false;// durch shared memory sm-> playerName ersetzt!
+       loopbuffer = nextbufLine();
+    if(strcmp(loopbuffer,"+ ENDPLAYERS")!=0)return false;
+    if(myplayerNr == 1){
+        loopbuffer = getLine();
+    }
+    else{
+        loopbuffer = nextbufLine();
+    }
+
+    
+return true;
+}
 void gameloop(){
     bool exit = false;
-    //only when player 2 for testing test:
-    //toServer("THINKING\n");
+    //printf("%s", loopbuffer);
+
     while(!exit){
-        loopbuffer = getLine();
         if(strcmp(loopbuffer,"+ WAIT\n") == 0){
             toServer("OKWAIT\n");
         }
@@ -73,10 +99,61 @@ void gameloop(){
             printf("Timeout -> Exiting Programm");
             break;
         }
-        if(strncmp(loopbuffer,"+ MOVE ",7) == 0){
-            readField();
+        if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
+            loopbuffer = nextbufLine();
+            if(!readField()){
+                printf("Field could not be read");
+                break;
+            }
+            toServer("THINKING\n");
+            /*to test (working)
+            for(int i = 0;i < 8;i++){
+                for(int j= 0;j < 8;j++){
+                    printf("%c",spielFeld[i][j]);
+                }
+                printf("\n");
+            }*/
+            getLine();
+            //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-        }        
+            toServer("PLAY D6\n");
+            if(!isnext("+ MOVEOK\n")){
+                printf("Invalid Thinker move");
+                break;
+            }
+        
+
+        }
+
+        if(strcmp(loopbuffer,"+ MOVE 3000\n") == 0){
+            getLine();
+            resetLinebuf();
+            loopbuffer = nextbufLine();
+            printf("%s",loopbuffer);
+            if(!readField()){
+                printf("Field could not be read");
+                break;
+            }
+            toServer("THINKING\n");
+            /*to test (working)
+            for(int i = 0;i < 8;i++){
+                for(int j= 0;j < 8;j++){
+                    printf("%c",spielFeld[i][j]);
+                }
+                printf("\n");
+            }*/
+            getLine();
+            //break;//entfernen wenn thinker funtioniert
+            //thinker anstoßen
+            toServer("PLAY D6\n");
+            if(!isnext("+ MOVEOK\n")){
+                printf("Invalid Thinker move");
+                break;
+            }
+        
+
+        }    
+        loopbuffer = getLine();        
     }
 
 }
@@ -106,11 +183,8 @@ int game(int sf, pid_t pid) {
 int main(int argc, char **argv) {
 
     init();
-    //buff = malloc(256*8);
-    // alles drüber free()
-
+    
     int opt;
-    //char *gameId;
     char gameId[14];
     int playerNr;
 
@@ -124,7 +198,7 @@ int main(int argc, char **argv) {
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
-					perror("Bitte 13-stellige Game-Id eingeben");
+					printf("Bitte 13-stellige Game-Id eingeben");
 					exit(EXIT_FAILURE);
                 }
                 else {
@@ -133,8 +207,8 @@ int main(int argc, char **argv) {
                 break;
             case 'p':
                 playerNr = atoi(optarg);
-                if (playerNr < 1 || playerNr > 2) {
-                	perror("Spieleranzahl 1 oder 2");
+                if (playerNr < 0 || playerNr > 1) {
+                	printf("Spieler 1 oder 0");
 					exit(EXIT_FAILURE);
 				}
                 break;
@@ -218,9 +292,15 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
+        if(!performConnection(sockfd,gameId,playerNr)){
+            printf("failed Server connection");
+            return EXIT_FAILURE;
+        }
+        if(!setPlayer()){
+            printf("Player can't be set");
+            return EXIT_FAILURE;
+        }
         gameloop();
-        readField();
     }
 
     close(sockfd);

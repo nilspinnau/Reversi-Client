@@ -1,6 +1,7 @@
 #include "../lib/performConnection.h"
 #include "../lib/handler.h"
 
+
 // vielleicht noch fehlerbehandlung von send bearbeiten
 bool performConnection(int socketfd, char *gameId, int playerNr) {
 
@@ -17,7 +18,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr) {
                     printf("no Playerspot availiable");
                     return false;
                 }
-                getLine();
+                
             }
             else{
                 printf("Game ID not Accepted");
