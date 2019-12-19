@@ -19,24 +19,6 @@
 #include "../lib/struct_H.h"
 #include "../lib/handler.h"
 
-struct player {
-    int playerNr;
-    char playerName[10];
-    bool registered;
-};
-
-struct sharedMemory {
-    struct player p;
-    char spielFeld[8][8];
-    char gameName[10];
-    char response[3];
-    char playerName[20];
-    int myplayerNr;
-    int playerCount;
-    pid_t thinker;
-    pid_t connector;
-};
-
 //Hilfsfunktion um Leerzeichen aus der Servernachricht zu loeschen
 void remove_spaces(char *str) { 
     int count = 0; 
@@ -55,7 +37,7 @@ void remove_spaces(char *str) {
 char *loopbuffer;
 char playerName[20];// durch shared memory sm-> playerName ersetzt!
 int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
-char spielFeld[8][8];// durch shared memory sm-> spielFeld ersetzt!
+char feld[8][8];
 
 //readfield error handle?
 bool readField() {
@@ -63,7 +45,7 @@ bool readField() {
     
     for(int row = 0;row < 8;row++){
         loopbuffer = nextbufLine();
-        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",&spielFeld[row][0],&spielFeld[row][1],&spielFeld[row][2],&spielFeld[row][3],&spielFeld[row][4],&spielFeld[row][5],&spielFeld[row][6],&spielFeld[row][7]);
+        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",&feld[row][0],&feld[row][1],&feld[row][2],&feld[row][3],&feld[row][4],&feld[row][5],&feld[row][6],&feld[row][7]);
     }
     loopbuffer = nextbufLine();
     if(strcmp(loopbuffer,"+ ENDFIELD")!=0)return false;
@@ -99,7 +81,7 @@ void gameloop(){
             toServer("OKWAIT\n");
         }
         if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
-            readField(buff);
+            readField();
             //handle who is winner
             break;
         }
@@ -245,6 +227,7 @@ int main(int argc, char **argv) {
     int ret_code =0;
     fd[0]=fd[1]=0;
     struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
+    struct spielFeld* field = malloc(sizeof(struct spielFeld));
     int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
     sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
     printf ("shared memory attached at address %p\n", sm);
@@ -263,6 +246,7 @@ int main(int argc, char **argv) {
         // READSEITE der Pipe schliessen
         close(fd[0]);
         sm->thinker = getppid();
+        field->Feld = feld;
         sm->feld = field;
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
@@ -294,7 +278,4 @@ int main(int argc, char **argv) {
 
     close(sockfd);
     return 0;
-}   
-
-
-
+}
