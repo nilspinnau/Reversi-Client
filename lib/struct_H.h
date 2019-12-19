@@ -4,19 +4,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-typedef struct player{
+/*typedef struct player{
     int playerNr;
     char playerName[10];
     bool registered;
-} player;
+} player;*/
 
-typedef struct spielFeld{
+/*typedef struct spielFeld{
     int width;
     int height; 
     char Feld[8][8];
-} spielFeld;
+} spielFeld; */
 
-typedef struct sharedMemory{
+/*typedef struct sharedMemory{
     struct player p;
     char gameName[10];
     bool awaitingMove;
@@ -26,6 +26,6 @@ typedef struct sharedMemory{
     pid_t thinker;
     pid_t connector;
 } sharedMemory;
-
+*/
 
 #endif

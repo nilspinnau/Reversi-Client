@@ -19,6 +19,7 @@
 #include "../lib/struct_H.h"
 #include "../lib/handler.h"
 
+extern char buff[256];
 struct player {
     int playerNr;
     char playerName[10];
@@ -114,17 +115,17 @@ void gameloop(){
                 break;
             }
             toServer("THINKING\n");
-            /*to test (working)
+            //to test (working)
             for(int i = 0;i < 8;i++){
                 for(int j= 0;j < 8;j++){
                     printf("%c",spielFeld[i][j]);
                 }
                 printf("\n");
-            }*/
+            }
             getLine();
             //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-            toServer("PLAY D6\n");
+            toServer("PLAY F4\n");
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move");
                 break;
@@ -153,7 +154,7 @@ void gameloop(){
             getLine();
             //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-            toServer("PLAY D6\n");
+            toServer("PLAY B6\n");
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move");
                 break;
@@ -263,7 +264,7 @@ int main(int argc, char **argv) {
         // READSEITE der Pipe schliessen
         close(fd[0]);
         sm->thinker = getppid();
-        sm->feld = field;
+        //sm->spielFeld = field;
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         // signal(SIGUSR1, handler);
@@ -271,8 +272,8 @@ int main(int argc, char **argv) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think(sm);
-        write(fd[1], answer, sizeof(answer));
+        //char *answer = think(sm);
+        //write(fd[1], answer, sizeof(answer));
     }
     
     /*
