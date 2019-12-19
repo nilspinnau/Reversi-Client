@@ -15,14 +15,27 @@
 
 #include "../lib/signalHandler.h"
 #include "../lib/performConnection.h"
-#include "../lib/think.h"
 #include "../lib/getconfig.h"
 #include "../lib/struct_H.h"
 #include "../lib/handler.h"
 
-struct spielFeld field;
+struct player {
+    int playerNr;
+    char playerName[10];
+    bool registered;
+};
 
-extern char buff[256];
+struct sharedMemory {
+    struct player p;
+    char spielFeld[8][8];
+    char gameName[10];
+    char response[3];
+    char playerName[20];
+    int myplayerNr;
+    int playerCount;
+    pid_t thinker;
+    pid_t connector;
+};
 
 //Hilfsfunktion um Leerzeichen aus der Servernachricht zu loeschen
 void remove_spaces(char *str) { 
@@ -40,38 +53,48 @@ void remove_spaces(char *str) {
 */
 
 char *loopbuffer;
+char playerName[20];// durch shared memory sm-> playerName ersetzt!
+int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
+char spielFeld[8][8];// durch shared memory sm-> spielFeld ersetzt!
+
 //readfield error handle?
-// ab TOTAL 2 von Server kommt Feld und alles in einer Nachricht, weil nur einmal S: ...
-// Frage hier also: wie liest man Feld aus dem buffer raus
-int readField(char *buffer) {
-    char* line ;
-    printf("hello: %s", buffer);
-    //loopbuffer = getLine();
-    while ( (line=strtok(buffer,"\n")) != NULL){
-       buffer = NULL; // strtok wird beim nächste Mal mit NULL aufgerufen
-       int row = line[2] -'1';
-       sscanf(line, "+ %*i %c %c %c %c %c %c %c %c", 
-       &field.Feld[row][0],&field.Feld[row][1],&field.Feld[row][2],
-       &field.Feld[row][3],&field.Feld[row][4],&field.Feld[row][5],
-       &field.Feld[row][6],&field.Feld[row][7]);
-    }
+bool readField() {
+    if(strcmp(loopbuffer,"+ FIELD 8,8")!=0)return false;
     
-    for(int i=0; i<8; i++){
-        for(int j=0; j<8;j++){
-       printf("%c", field.Feld[i][j]);
+    for(int row = 0;row < 8;row++){
+        loopbuffer = nextbufLine();
+        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",&spielFeld[row][0],&spielFeld[row][1],&spielFeld[row][2],&spielFeld[row][3],&spielFeld[row][4],&spielFeld[row][5],&spielFeld[row][6],&spielFeld[row][7]);
     }
-        printf("\n");
-       }
-     return 0;
+    loopbuffer = nextbufLine();
+    if(strcmp(loopbuffer,"+ ENDFIELD")!=0)return false;
+    return true;
 }
 
+bool setPlayer(){
+    loopbuffer = getbuffer();
+    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&myplayerNr)!= 1)return false;// durch shared memory sm-> myplayerNr ersetzt!
+    getLine();// Line Total 2 .. Endplayer .. Field/wait
+    loopbuffer = nextbufLine();
+    if(strcmp(loopbuffer,"+ TOTAL 2")!=0)return false;
+       loopbuffer = nextbufLine();
+    if(sscanf(loopbuffer,"+ %*d %s player %*d",playerName)!= 1)return false;// durch shared memory sm-> playerName ersetzt!
+       loopbuffer = nextbufLine();
+    if(strcmp(loopbuffer,"+ ENDPLAYERS")!=0)return false;
+    if(myplayerNr == 1){
+        loopbuffer = getLine();
+    }
+    else{
+        loopbuffer = nextbufLine();
+    }
 
+    
+return true;
+}
 void gameloop(){
     bool exit = false;
-    //only when player 2 for testing test:
-    //toServer("THINKING\n");
+    //printf("%s", loopbuffer);
+
     while(!exit){
-        loopbuffer = getLine();
         if(strcmp(loopbuffer,"+ WAIT\n") == 0){
             toServer("OKWAIT\n");
         }
@@ -84,11 +107,61 @@ void gameloop(){
             printf("Timeout -> Exiting Programm");
             break;
         }
-        if(strcmp(loopbuffer,"+ ENDFIELD") == 0){
+        if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
+            loopbuffer = nextbufLine();
+            if(!readField()){
+                printf("Field could not be read");
+                break;
+            }
             toServer("THINKING\n");
-            readField(buff);
+            /*to test (working)
+            for(int i = 0;i < 8;i++){
+                for(int j= 0;j < 8;j++){
+                    printf("%c",spielFeld[i][j]);
+                }
+                printf("\n");
+            }*/
+            getLine();
+            //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-        }        
+            toServer("PLAY D6\n");
+            if(!isnext("+ MOVEOK\n")){
+                printf("Invalid Thinker move");
+                break;
+            }
+        
+
+        }
+
+        if(strcmp(loopbuffer,"+ MOVE 3000\n") == 0){
+            getLine();
+            resetLinebuf();
+            loopbuffer = nextbufLine();
+            printf("%s",loopbuffer);
+            if(!readField()){
+                printf("Field could not be read");
+                break;
+            }
+            toServer("THINKING\n");
+            /*to test (working)
+            for(int i = 0;i < 8;i++){
+                for(int j= 0;j < 8;j++){
+                    printf("%c",spielFeld[i][j]);
+                }
+                printf("\n");
+            }*/
+            getLine();
+            //break;//entfernen wenn thinker funtioniert
+            //thinker anstoßen
+            toServer("PLAY D6\n");
+            if(!isnext("+ MOVEOK\n")){
+                printf("Invalid Thinker move");
+                break;
+            }
+        
+
+        }    
+        loopbuffer = getLine();        
     }
 
 }
@@ -96,11 +169,8 @@ void gameloop(){
 int main(int argc, char **argv) {
 
     init();
-    //buff = malloc(256*8);
-    // alles drüber free()
-
+    
     int opt;
-    //char *gameId;
     char gameId[14];
     int playerNr;
 
@@ -114,7 +184,7 @@ int main(int argc, char **argv) {
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
-					perror("Bitte 13-stellige Game-Id eingeben");
+					printf("Bitte 13-stellige Game-Id eingeben");
 					exit(EXIT_FAILURE);
                 }
                 else {
@@ -123,8 +193,8 @@ int main(int argc, char **argv) {
                 break;
             case 'p':
                 playerNr = atoi(optarg);
-                if (playerNr < 1 || playerNr > 2) {
-                	perror("Spieleranzahl 1 oder 2");
+                if (playerNr < 0 || playerNr > 1) {
+                	printf("Spieler 1 oder 0");
 					exit(EXIT_FAILURE);
 				}
                 break;
@@ -211,11 +281,15 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        if(!performConnection(sockfd,gameId,playerNr))return EXIT_FAILURE;
-        sm->connector = getpid();
+        if(!performConnection(sockfd,gameId,playerNr)){
+            printf("failed Server connection");
+            return EXIT_FAILURE;
+        }
+        if(!setPlayer()){
+            printf("Player can't be set");
+            return EXIT_FAILURE;
+        }
         gameloop();
-        readField(buff);
-        sm->connector = getpid();
     }
 
     close(sockfd);

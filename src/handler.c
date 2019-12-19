@@ -3,9 +3,12 @@
 
 int socketfd;
 char buff[256];
+char *buffindexold;
+char *buffindexnew;
 
 void setSocket(int sockfd) {
     socketfd = sockfd;
+    resetLinebuf();
 }
 
 bool isnext(char *s) {
@@ -54,6 +57,18 @@ int cleanExit(char *s) {
     return EXIT_FAILURE;
 }
 
-void test(){
-    printf("Test success");
+char *getbuffer(){
+    return buff;
+}
+void resetLinebuf(){
+    buffindexnew = buff;
+}
+char *nextbufLine(){
+    buffindexold = buffindexnew;
+    while(*buffindexnew != '\n'){
+        buffindexnew++;
+    }
+    *buffindexnew = '\0';
+    buffindexnew++;
+    return buffindexold;
 }

@@ -23,3 +23,9 @@ int cleanExit(char *s);
 bool isnext(char *s);
 
 char *getLine();
+
+char *getbuffer();
+
+char *nextbufLine();
+
+void resetLinebuf();
