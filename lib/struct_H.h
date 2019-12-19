@@ -14,7 +14,7 @@ typedef struct spielFeld{
     int width;
     int height; 
     char Feld[8][8];
-} spielFeld;
+} spielFeld; 
 
 typedef struct sharedMemory{
     struct player p;

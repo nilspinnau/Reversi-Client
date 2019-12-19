@@ -34,6 +34,8 @@ void remove_spaces(char *str) {
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
 */
 
+
+
 char *loopbuffer;
 char playerName[20];// durch shared memory sm-> playerName ersetzt!
 int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
@@ -96,17 +98,17 @@ void gameloop(){
                 break;
             }
             toServer("THINKING\n");
-            /*to test (working)
+            //to test (working)
             for(int i = 0;i < 8;i++){
                 for(int j= 0;j < 8;j++){
-                    printf("%c",spielFeld[i][j]);
+                    printf("%c",feld[i][j]);
                 }
                 printf("\n");
-            }*/
+            }
             getLine();
             //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-            toServer("PLAY D6\n");
+            toServer("PLAY F4\n");
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move");
                 break;
@@ -125,17 +127,16 @@ void gameloop(){
                 break;
             }
             toServer("THINKING\n");
-            /*to test (working)
             for(int i = 0;i < 8;i++){
                 for(int j= 0;j < 8;j++){
-                    printf("%c",spielFeld[i][j]);
+                    printf("%c",feld[i][j]);
                 }
                 printf("\n");
-            }*/
+            }
             getLine();
             //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-            toServer("PLAY D6\n");
+            toServer("PLAY B6\n");
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move");
                 break;
@@ -227,7 +228,6 @@ int main(int argc, char **argv) {
     int ret_code =0;
     fd[0]=fd[1]=0;
     struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    struct spielFeld* field = malloc(sizeof(struct spielFeld));
     int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
     sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
     printf ("shared memory attached at address %p\n", sm);
@@ -246,8 +246,7 @@ int main(int argc, char **argv) {
         // READSEITE der Pipe schliessen
         close(fd[0]);
         sm->thinker = getppid();
-        field->Feld = feld;
-        sm->feld = field;
+        //sm->spielFeld = field;
         // ab hier unklar
         ret_code = waitpid(pid, NULL, 0);
         // signal(SIGUSR1, handler);
@@ -255,8 +254,8 @@ int main(int argc, char **argv) {
             perror ("Fehler beim Warten auf Kindprozess.");
             exit(EXIT_FAILURE);
         }  
-        char *answer = think(sm);
-        write(fd[1], answer, sizeof(answer));
+        //char *answer = think(sm);
+        //write(fd[1], answer, sizeof(answer));
     }
     
     /*
