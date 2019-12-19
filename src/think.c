@@ -3,8 +3,8 @@
 #include <stdio.h>
 
 char *think(sharedMemory *sm){
-    struct spielFeld field = sm->feld;
-    char Feld[8][8] = field->Feld;
+    spielFeld feld = sm->feld;
+    char Feld[8][8] = feld->Feld;
     struct player p = sm->p;
     char playerName[10] = p->playerName;
     for (int i=0; i<8; i++) {
