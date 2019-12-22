@@ -1,12 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdbool.h>
-
+#ifndef struct_H
+#define struct_H
+#include "../lib/struct_H.h"
 #include "../lib/handler.h"
+#endif
 
 // Prolog Phase der Kommunikation
 // Zuweisung eines freien Spielers durch Gameserver

@@ -1,23 +1,11 @@
-#include <stdio.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <getopt.h>
-#include <sys/shm.h>
-#include <sys/wait.h>
-#include <stdbool.h>
-#include <signal.h>
-#include <time.h>
-
+#ifndef struct_H
+#define struct_H
+#include "../lib/struct_H.h"
 #include "../lib/signalHandler.h"
 #include "../lib/performConnection.h"
 #include "../lib/getconfig.h"
-#include "../lib/struct_H.h"
 #include "../lib/handler.h"
+#endif
 
 //Hilfsfunktion um Leerzeichen aus der Servernachricht zu loeschen
 void remove_spaces(char *str) { 

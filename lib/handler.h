@@ -1,12 +1,7 @@
-#include <stdio.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <stdbool.h>
-#include <unistd.h>
-
+#ifndef struct_H
+#define struct_H
+#include "../lib/struct_H.h"
+#endif
 
 void setSocket(int socketfd);
 

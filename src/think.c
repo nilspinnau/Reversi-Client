@@ -1,8 +1,5 @@
 #include "../lib/think.h"
-#include "../lib/struct_H.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
 
 char *think(sharedMemory *sm){
     spielFeld feld = sm->feld;
