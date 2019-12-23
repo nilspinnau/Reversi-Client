@@ -12,8 +12,8 @@ bool performConnection(int socketfd, char *gameId, int playerNr) {
             threeServer("ID ", gameId, "\n");
             if(isnext("+ PLAYING Reversi\n")){
                 getLine();
-                if(playerNr == 1) toServer("PLAYER 1\n");
-                else toServer("PLAYER 0\n");
+                if(playerNr == 1) toServer("PLAYER\n");
+                else toServer("PLAYER\n");
                 if(isnext("- No free player\n")){
                     printf("no Playerspot availiable");
                     return false;

@@ -1,6 +1,6 @@
 #include "../lib/think.h"
 
-
+/*
 char *think(sharedMemory *sm){
     spielFeld feld = sm->feld;
     char Feld[8][8];
@@ -52,3 +52,4 @@ char *think(sharedMemory *sm){
     }
     return *answer;
 }
+*/

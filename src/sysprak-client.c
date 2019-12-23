@@ -7,14 +7,6 @@
 #include "../lib/handler.h"
 #endif
 
-//Hilfsfunktion um Leerzeichen aus der Servernachricht zu loeschen
-void remove_spaces(char *str) { 
-    int count = 0; 
-    for (int i = 0; str[i]; i++) 
-        if (str[i] != ' ') 
-            str[count++] = str[i]; 
-    str[count] = '\0'; 
-} 
 
 /*
 #define GAMEKINDNAME "Reversi"
@@ -25,34 +17,38 @@ void remove_spaces(char *str) {
 
 
 char *loopbuffer;
+/*
 char playerName[20];// durch shared memory sm-> playerName ersetzt!
 int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
 char feld[8][8];
-
+*/
 //readfield error handle?
-bool readField() {
+bool readField(sharedMemory* sm) {
     if(strcmp(loopbuffer,"+ FIELD 8,8")!=0)return false;
     
     for(int row = 0;row < 8;row++){
         loopbuffer = nextbufLine();
-        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",&feld[row][0],&feld[row][1],&feld[row][2],&feld[row][3],&feld[row][4],&feld[row][5],&feld[row][6],&feld[row][7]);
+        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",
+        &(sm->feld.Feld[row][0]),&(sm->feld.Feld[row][1]),&(sm->feld.Feld[row][2]),
+        &(sm->feld.Feld[row][3]),&(sm->feld.Feld[row][4]),&(sm->feld.Feld[row][5]),
+        &(sm->feld.Feld[row][6]),&(sm->feld.Feld[row][7]) );
     }
     loopbuffer = nextbufLine();
     if(strcmp(loopbuffer,"+ ENDFIELD")!=0)return false;
     return true;
 }
 
-bool setPlayer(){
+bool setPlayer(sharedMemory* sm){
     loopbuffer = getbuffer();
-    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&myplayerNr)!= 1)return false;// durch shared memory sm-> myplayerNr ersetzt!
+    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&(sm->enemy.playerNr))!= 1)return false;// durch shared memory sm-> myplayerNr ersetzt!
     getLine();// Line Total 2 .. Endplayer .. Field/wait
     loopbuffer = nextbufLine();
     if(strcmp(loopbuffer,"+ TOTAL 2")!=0)return false;
        loopbuffer = nextbufLine();
-    if(sscanf(loopbuffer,"+ %*d %s player %*d",playerName)!= 1)return false;// durch shared memory sm-> playerName ersetzt!
+    if(sscanf(loopbuffer,"+ %*d %s player %*d",sm->enemy.playerName)!= 1)return false;// durch shared memory sm-> playerName ersetzt!
        loopbuffer = nextbufLine();
     if(strcmp(loopbuffer,"+ ENDPLAYERS")!=0)return false;
-    if(myplayerNr == 1){
+    if(sm->enemy.playerNr == 1){
         loopbuffer = getLine();
     }
     else{
@@ -62,7 +58,7 @@ bool setPlayer(){
     
 return true;
 }
-void gameloop(){
+void gameloop(sharedMemory* sm){
     bool exit = false;
     //printf("%s", loopbuffer);
 
@@ -71,7 +67,7 @@ void gameloop(){
             toServer("OKWAIT\n");
         }
         if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
-            readField();
+            readField(sm);
             //handle who is winner
             break;
         }
@@ -81,7 +77,7 @@ void gameloop(){
         }
         if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
             loopbuffer = nextbufLine();
-            if(!readField()){
+            if(!readField(sm)){
                 printf("Field could not be read");
                 break;
             }
@@ -89,7 +85,7 @@ void gameloop(){
             //to test (working)
             for(int i = 0;i < 8;i++){
                 for(int j= 0;j < 8;j++){
-                    printf("%c",feld[i][j]);
+                    printf("%c",sm->feld.Feld[i][j]);
                 }
                 printf("\n");
             }
@@ -110,14 +106,14 @@ void gameloop(){
             resetLinebuf();
             loopbuffer = nextbufLine();
             printf("%s",loopbuffer);
-            if(!readField()){
+            if(!readField(sm)){
                 printf("Field could not be read");
                 break;
             }
             toServer("THINKING\n");
             for(int i = 0;i < 8;i++){
                 for(int j= 0;j < 8;j++){
-                    printf("%c",feld[i][j]);
+                    printf("%c",sm->feld.Feld[i][j]);
                 }
                 printf("\n");
             }
@@ -215,21 +211,31 @@ int main(int argc, char **argv) {
     pid_t pid =0;
     int ret_code =0;
     fd[0]=fd[1]=0;
-    struct sharedMemory* sm = malloc(sizeof(struct sharedMemory));
-    int shm_id = shmget(IPC_PRIVATE,sizeof(struct sharedMemory),0);
-    sm = (struct sharedMemory*) shmat(shm_id,NULL,0);
-    printf ("shared memory attached at address %p\n", sm);
+    sharedMemory *sm;
+    int shm_id ;
+    // get ID of Shared Memory Segment   
+    shm_id = shmget(IPC_PRIVATE,sizeof(sharedMemory),IPC_CREAT | 0666 );
+      if(shm_id < 0) {
+        printf("shmget ERROR");
+        exit(EXIT_FAILURE);
+        }
+    // attach the Shared Memory Segment
+        sm = (sharedMemory*) shmat(shm_id,NULL,0);
+    printf ("shared memory attached at address %p\n", &sm); 
+       // if((sharedMemory*) sm  ==  (sharedMemory*) -1) {         
+        //printf("shmat Error");
+        //exit(EXIT_FAILURE);
+    //}
     
-    printf("test\n");
-
+    
     pid = fork();
     if (pid < 0) {
         perror ("Fehler bei fork().");
         exit(EXIT_FAILURE);
     }
-   /*
-   * THINKER = ELTERNPROZESS
-   */
+    /*
+    * THINKER = ELTERNPROZESS
+    */
     if(pid >0){
         // READSEITE der Pipe schliessen
         close(fd[0]);
@@ -253,16 +259,16 @@ int main(int argc, char **argv) {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
         if(!performConnection(sockfd,gameId,playerNr)){
-            printf("failed Server connection");
+            printf("Failed Server connection");
             return EXIT_FAILURE;
         }
-        if(!setPlayer()){
+        if(!setPlayer(sm)){
             printf("Player can't be set");
             return EXIT_FAILURE;
         }
-        gameloop();
+        gameloop(sm);
     }
-
+    shmctl(shm_id, IPC_RMID, NULL);
     close(sockfd);
     return 0;
 }

@@ -22,11 +22,11 @@ typedef struct player{
 typedef struct spielFeld{
     int width;
     int height; 
-    char Feld[width][height];
+    char Feld[8][9];
 } spielFeld; 
 
 typedef struct sharedMemory{
-    struct player you;
+    int myPlayerNr;
     struct player enemy;
     char gameName[10];
     int playerCount;
