@@ -5,6 +5,8 @@
 #include "../lib/performConnection.h"
 #include "../lib/getconfig.h"
 #include "../lib/handler.h"
+#include "../lib/gameloop.h"
+#include "../lib/readField.h"
 #endif
 
 
@@ -16,122 +18,14 @@
 
 
 
-char *loopbuffer;
 /*
 char playerName[20];// durch shared memory sm-> playerName ersetzt!
 int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
 char feld[8][8];
 */
 //readfield error handle?
-bool readField(sharedMemory* sm) {
-    if(strcmp(loopbuffer,"+ FIELD 8,8")!=0)return false;
-    
-    for(int row = 0;row < 8;row++){
-        loopbuffer = nextbufLine();
-        sscanf(loopbuffer,"+ %*c %c %c %c %c %c %c %c %c",
-        &(sm->feld.Feld[row][0]),&(sm->feld.Feld[row][1]),&(sm->feld.Feld[row][2]),
-        &(sm->feld.Feld[row][3]),&(sm->feld.Feld[row][4]),&(sm->feld.Feld[row][5]),
-        &(sm->feld.Feld[row][6]),&(sm->feld.Feld[row][7]) );
-    }
-    loopbuffer = nextbufLine();
-    if(strcmp(loopbuffer,"+ ENDFIELD")!=0)return false;
-    return true;
-}
 
-bool setPlayer(sharedMemory* sm){
-    loopbuffer = getbuffer();
-    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&(sm->enemy.playerNr))!= 1)return false;// durch shared memory sm-> myplayerNr ersetzt!
-    getLine();// Line Total 2 .. Endplayer .. Field/wait
-    loopbuffer = nextbufLine();
-    if(strcmp(loopbuffer,"+ TOTAL 2")!=0)return false;
-       loopbuffer = nextbufLine();
-    if(sscanf(loopbuffer,"+ %*d %s player %*d",sm->enemy.playerName)!= 1)return false;// durch shared memory sm-> playerName ersetzt!
-       loopbuffer = nextbufLine();
-    if(strcmp(loopbuffer,"+ ENDPLAYERS")!=0)return false;
-    if(sm->enemy.playerNr == 1){
-        loopbuffer = getLine();
-    }
-    else{
-        loopbuffer = nextbufLine();
-    }
 
-    
-return true;
-}
-void gameloop(sharedMemory* sm){
-    bool exit = false;
-    //printf("%s", loopbuffer);
-
-    while(!exit){
-        if(strcmp(loopbuffer,"+ WAIT\n") == 0){
-            toServer("OKWAIT\n");
-        }
-        if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
-            readField(sm);
-            //handle who is winner
-            break;
-        }
-        if(strcmp(loopbuffer,"- TIMEOUT Be faster next time\n") == 0){
-            printf("Timeout -> Exiting Programm");
-            break;
-        }
-        if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
-            loopbuffer = nextbufLine();
-            if(!readField(sm)){
-                printf("Field could not be read");
-                break;
-            }
-            toServer("THINKING\n");
-            //to test (working)
-            for(int i = 0;i < 8;i++){
-                for(int j= 0;j < 8;j++){
-                    printf("%c",sm->feld.Feld[i][j]);
-                }
-                printf("\n");
-            }
-            getLine();
-            //break;//entfernen wenn thinker funtioniert
-            //thinker anstoßen
-            toServer("PLAY F4\n");
-            if(!isnext("+ MOVEOK\n")){
-                printf("Invalid Thinker move");
-                break;
-            }
-        
-
-        }
-
-        if(strcmp(loopbuffer,"+ MOVE 3000\n") == 0){
-            getLine();
-            resetLinebuf();
-            loopbuffer = nextbufLine();
-            printf("%s",loopbuffer);
-            if(!readField(sm)){
-                printf("Field could not be read");
-                break;
-            }
-            toServer("THINKING\n");
-            for(int i = 0;i < 8;i++){
-                for(int j= 0;j < 8;j++){
-                    printf("%c",sm->feld.Feld[i][j]);
-                }
-                printf("\n");
-            }
-            getLine();
-            //break;//entfernen wenn thinker funtioniert
-            //thinker anstoßen
-            toServer("PLAY B6\n");
-            if(!isnext("+ MOVEOK\n")){
-                printf("Invalid Thinker move");
-                break;
-            }
-        
-
-        }    
-        loopbuffer = getLine();        
-    }
-
-}
 
 int main(int argc, char **argv) {
 
@@ -262,11 +156,14 @@ int main(int argc, char **argv) {
             printf("Failed Server connection");
             return EXIT_FAILURE;
         }
-        if(!setPlayer(sm)){
-            printf("Player can't be set");
+        if(gameloop(sm)){
+            printf("Game finito");
+            return EXIT_SUCCESS;
+        }
+        else{
+            printf("Game finito Fehler");
             return EXIT_FAILURE;
         }
-        gameloop(sm);
     }
     shmctl(shm_id, IPC_RMID, NULL);
     close(sockfd);
