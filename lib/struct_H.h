@@ -13,7 +13,6 @@
 #include <signal.h>
 #include <time.h>
 
-
 typedef struct player{
     int playerNr;
     char playerName[10];
@@ -23,16 +22,16 @@ typedef struct player{
 typedef struct spielFeld{
     int width;
     int height; 
-    char Feld[8][8];
+    char Feld[width][height];
 } spielFeld; 
 
 typedef struct sharedMemory{
-    struct player p;
+    struct player you;
+    struct player enemy;
     char gameName[10];
-    bool awaitingMove;
-    int playerNr;
     int playerCount;
     struct spielFeld feld;
     pid_t thinker;
     pid_t connector;
 } sharedMemory;
+
