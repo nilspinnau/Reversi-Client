@@ -5,6 +5,7 @@
 int performConnection(int socketfd, char *gameId, int playerNr) {
 
     char *version = "2.3";
+	char *id = gameId;
 
     char data[256];
 
@@ -21,19 +22,21 @@ int performConnection(int socketfd, char *gameId, int playerNr) {
                     printf("C: %s", answer);
                     
                 } else if(strstr(data, "+ Client version accepted - please send Game-ID to join") != NULL) {
-                    char id[30];
-                    sprintf(id, "ID %s%s", gameId, "\n\0");
-                    send(socketfd, id, sizeof(id), 0);
-                    printf("C: %s", id);
+					// sending GameId
+                    char answer[30];
+                    sprintf(answer, "ID %s%s", id, "\n\0");
+                    send(socketfd, answer, sizeof(answer), 0);
+                    printf("C: %s", answer);
 
                 } else if(strstr(data, "+ PLAYING") != NULL) {
                     // nothing happens, server sends another message
                 
                 } else if(strstr(data, "+ GAMENAME") != NULL) {
-                    char player[30];
-                    sprintf(player, "PLAYER %i%s", playerNr, "\n\0");
-                    send(socketfd, player, sizeof(player), 0);
-                    printf("C: %s\n", player);
+					// sending playerNr
+                    char answer[30];
+                    sprintf(answer, "PLAYER %i%s", playerNr, "\n\0");
+                    send(socketfd, answer, sizeof(answer), 0);
+                    printf("C: %s\n", answer);
                 
                 } else if(strstr(data, "+ YOU") != NULL) {
                     // server: Mitspielernummer and Mitspielername

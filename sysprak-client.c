@@ -6,8 +6,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+<<<<<<< HEAD
 #include <sys/wait.h>
 #include <sys/shm.h>
+=======
+#include <getopt.h>
+#include <sys/wait.h>
+>>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
 #include "performConnection.h"
 
 #define GAMEKINDNAME "Reversi"
@@ -17,12 +22,13 @@
 int main(int argc, char **argv) {
 
     int opt;
-    char* gameId;
+    char *gameId;
     int playerNr;
 
-     while ((opt = getopt (argc, argv, "g:p:")) != -1) {
+    while ((opt = getopt (argc, argv, "g:p:")) != -1) {
         switch (opt) {
             case 'g':
+<<<<<<< HEAD
  	            gameId = optarg;
 		    if (strlen(gameId) != 13) {
 			perror("Bitte 13-stellige Game-Id eingeben\n");
@@ -34,6 +40,21 @@ int main(int argc, char **argv) {
 		       perror("Spieleranzahl 1 oder 2\n");
 			}
 	            break;
+=======
+                gameId = optarg;
+                if (strlen(gameId) != 13) {
+					perror("Bitte 13-stellige Game-Id eingeben");
+					exit(EXIT_FAILURE);
+                } 
+                break;
+            case 'p':
+                playerNr = atoi(optarg);
+                if (playerNr < 1 || playerNr > 2) {
+                	perror("Spieleranzahl 1 oder 2");
+					exit(EXIT_FAILURE);
+				}
+                break;
+>>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
         }
     }
     int sockfd, portno;
@@ -91,14 +112,16 @@ int main(int argc, char **argv) {
    /*
    * THINKER = ELTERNPROZESS
    */
-  if(pid >0){
-      // READSEITE der Pipe schliessen
-      close(fd[0]);
-    ret_code = waitpid(pid, NULL, 0);
-  if (ret_code < 0) {
-      perror ("Fehler beim Warten auf Kindprozess.");
-      exit(EXIT_FAILURE);
+    if(pid >0){
+        // READSEITE der Pipe schliessen
+        close(fd[0]);
+        ret_code = waitpid(pid, NULL, 0);
+    }
+    if (ret_code < 0) {
+        perror ("Fehler beim Warten auf Kindprozess.");
+        exit(EXIT_FAILURE);
     }  
+<<<<<<< HEAD
 }
   /*
    * Connector = Kindprozess
@@ -110,4 +133,17 @@ int main(int argc, char **argv) {
   }
   
     return 0;
+=======
+    /*
+    * Connector = Kindprozess
+    */
+    else {
+        // Schreibseite der Pipe schliessen
+        close(fd[1]);
+    
+    
+        performConnection(sockfd,gameId,playerNr);
+>>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
     }
+    return 0;
+}
