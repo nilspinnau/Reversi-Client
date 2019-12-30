@@ -2,6 +2,24 @@
 
 
 char *think(sharedMemory *sm){
+     //to test (working)
+    /*
+    for(int i = 0;i < 8;i++){
+        for(int j= 0;j < 8;j++){
+            printf("%c",sm->feld.Feld[i][j]);
+        }
+         printf("\n");
+    }
+    */
+    if((sm->myPlayerNr)==0){
+        return "E3";
+    }
+    if((sm->myPlayerNr)==1){
+        return"E6";
+    }
+        return NULL;
+    }
+    /*        
     spielFeld feld = sm->feld;
     char Feld[8][8];
     memcpy(Feld,feld.Feld,64*sizeof(char));
@@ -52,3 +70,4 @@ char *think(sharedMemory *sm){
     return strncat(answer,"",1);
 }
 
+*/

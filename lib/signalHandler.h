@@ -1,6 +1,7 @@
 #ifndef struct_H
 #define struct_H
 #include "../lib/struct_H.h"
+#include "../lib/handler.h"
 #endif
 
-void handler(int sig,char field[8][8]);
+void signalhandler(int signum);

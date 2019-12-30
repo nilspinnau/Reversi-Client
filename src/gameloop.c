@@ -1,11 +1,11 @@
 #include "../lib/gameloop.h"
 #include "../lib/handler.h"
 
-bool gameloop(sharedMemory* sm){
+bool gameloop(sharedMemory* sm, int fd[2]){
 
     char *loopbuffer;
     loopbuffer = getbuffer();
-    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&(sm->enemy.playerNr))!= 1)return false;// not enemy + set enemy to oppposite yours
+    if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&(sm->myPlayerNr))!= 1)return false;// not enemy + set enemy to oppposite yours
     getLine();// Line Total 2 .. Endplayer .. Field/wait
     loopbuffer = nextbufLine();
     if(strcmp(loopbuffer,"+ TOTAL 2")!=0)return false;
@@ -33,7 +33,7 @@ bool gameloop(sharedMemory* sm){
             break;
         }
         if(strcmp(loopbuffer,"- TIMEOUT Be faster next time\n") == 0){
-            printf("Timeout -> Exiting Programm");
+            printf("Timeout -> Exiting Programm\n");
             break;
         }
         if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
@@ -43,53 +43,24 @@ bool gameloop(sharedMemory* sm){
                 break;
             }
             toServer("THINKING\n");
-            //to test (working)
-            for(int i = 0;i < 8;i++){
-                for(int j= 0;j < 8;j++){
-                    printf("%c",sm->feld.Feld[i][j]);
-                }
-                printf("\n");
-            }
-            getLine();
-            //break;//entfernen wenn thinker funtioniert
-            //thinker anstoßen
-            toServer("PLAY F4\n");
-            if(!isnext("+ MOVEOK\n")){
-                printf("Invalid Thinker move");
+            if(!isnext("+ OKTHINK\n")){
+                printf("THINKING NOT ALLOWED");
                 break;
             }
-        
-
-        }
-
-        if(strcmp(loopbuffer,"+ MOVE 3000\n") == 0){
-            getLine();
-            resetLinebuf();
-            loopbuffer = nextbufLine();
-            printf("%s",loopbuffer);
-            if(!readField(sm,loopbuffer)){
-                printf("Field could not be read");
-                return false;
-            }
-            toServer("THINKING\n");
-            for(int i = 0;i < 8;i++){
-                for(int j= 0;j < 8;j++){
-                    printf("%c",sm->feld.Feld[i][j]);
-                }
-                printf("\n");
-            }
-            getLine();
-            //break;//entfernen wenn thinker funtioniert
             //thinker anstoßen
-            toServer("PLAY B6\n");
+            sm->thinker = getppid();
+            sm->thinkFlag = true;
+            kill(sm->thinker,SIGUSR1);
+            char themove[2];
+            read(fd[0],themove, sizeof(themove));
+            threeServer("PLAY ",themove,"\n");
+            
             if(!isnext("+ MOVEOK\n")){
-                printf("Invalid Thinker move");
-                return false;
+                printf("Invalid Thinker move\n");
+                break;
             }
-        
-
-        }    
-        loopbuffer = getLine();        
+        }
+       loopbuffer = getLine();        
     }
     return false;
 

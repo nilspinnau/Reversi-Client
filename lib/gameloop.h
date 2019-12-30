@@ -5,4 +5,4 @@
 #include "../lib/readField.h"
 #endif
 
-bool gameloop(sharedMemory* sm);
+bool gameloop(sharedMemory* sm, int fd[2]);

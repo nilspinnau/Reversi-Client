@@ -26,9 +26,9 @@ typedef struct spielFeld{
 } spielFeld; 
 
 typedef struct sharedMemory{
+    volatile bool thinkFlag;
     int myPlayerNr;
-	struct player p;
-    struct player enemy;
+	struct player enemy;
     char gameName[10];
     int playerCount;
     struct spielFeld feld;

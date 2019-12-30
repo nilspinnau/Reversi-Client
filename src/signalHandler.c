@@ -1,8 +1,10 @@
 #include "../lib/signalHandler.h"
-
-void handler(int sig, char field[8][8]) {
-    printf("%c\n", field[0][0]);
-    if(sig == SIGUSR1) {
-        //think(field);
+#include "../lib/think.h"
+extern sharedMemory *sm;
+extern int fd[2];
+void signalhandler(int signum) {
+    if((signum == SIGUSR1) && (sm->thinkFlag)){
+        write(fd[1],think(sm),sizeof( think(sm)));
+        sm->thinkFlag = false;
     }
 }
