@@ -22,16 +22,16 @@ typedef struct player{
 typedef struct spielFeld{
     int width;
     int height; 
-    char Feld[8][9];
+    char Feld[8][8];
 } spielFeld; 
 
 typedef struct sharedMemory{
     volatile bool thinkFlag;
+    struct spielFeld spielFeld;
+    struct player enemy;
     int myPlayerNr;
-	struct player enemy;
-    char gameName[10];
     int playerCount;
-    struct spielFeld feld;
+	char gameName[10];
     pid_t thinker;
     pid_t connector;
 } sharedMemory;

@@ -33,9 +33,8 @@ int main(int argc, char **argv) {
     int opt;
     char gameId[14];
     int playerNr;
-
     char path[256];
-    strcpy(path,"config.conf");
+    strcpy(path,"config.conf\n");
     configs res;
     configs* rp;
     memset(&res,0,sizeof(configs));
@@ -44,7 +43,7 @@ int main(int argc, char **argv) {
         switch (opt) {
             case 'g':
                 if (strlen(optarg) != 13) {
-					printf("Bitte 13-stellige Game-Id eingeben");
+					printf("Bitte 13-stellige Game-Id eingeben\n");
 					exit(EXIT_FAILURE);
                 }
                 else {
@@ -54,7 +53,7 @@ int main(int argc, char **argv) {
             case 'p':
                 playerNr = atoi(optarg);
                 if (playerNr < 0 || playerNr > 1) {
-                	printf("Spieler 1 oder 0");
+                	printf("Spieler 1 oder 0\n");
 					exit(EXIT_FAILURE);
 				}
                 break;
@@ -96,10 +95,9 @@ int main(int argc, char **argv) {
         server->h_length);
     serv_addr.sin_port = htons(rp->port_nr);
     if (connect(sockfd,(struct sockaddr*) &serv_addr,sizeof(serv_addr)) < 0){
-        perror("ERROR connecting");
+        perror("ERROR connecting\n");
     }
 
-    
     pid_t pid =0;
     //int ret_code =0;
     fd[0]=fd[1]=0;
@@ -108,13 +106,13 @@ int main(int argc, char **argv) {
     // get ID of Shared Memory Segment   
     shm_id = shmget(IPC_PRIVATE,sizeof(sharedMemory),IPC_CREAT | 0666 );
         if(shm_id < 0) {
-            printf("shmget ERROR");
+            printf("shmget ERROR\n");
             exit(EXIT_FAILURE);
         }
     // attach the Shared Memory Segment
     sm = (sharedMemory*) shmat(shm_id,NULL,0);
         if((sharedMemory*) sm  ==  (sharedMemory*) -1) {         
-            printf("shmat Error");
+            printf("shmat Error\n");
             exit(EXIT_FAILURE);
          }
     sm->thinkFlag=false;
@@ -126,7 +124,7 @@ int main(int argc, char **argv) {
     pid = fork();
     
     if (pid < 0) {
-        perror ("Fehler bei fork().");
+        perror ("Fehler bei fork().\n");
         exit(EXIT_FAILURE);
     }
     /*

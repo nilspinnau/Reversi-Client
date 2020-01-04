@@ -1,8 +1,28 @@
 #include "../lib/gameloop.h"
 #include "../lib/handler.h"
+#include <sys/select.h>
+#include <assert.h>
+/* add a fd to fd_set, and update max_fd */
+int safe_fdSet(int fd, fd_set* fdSet, int* max_fd){
+    assert(max_fd != NULL);
+    FD_SET(fd,fdSet);
+    if(fd > *max_fd){
+        *max_fd= fd;
+    }
+    return 0;
+}
+int safe_fdClear(int fd, fd_set* fdSet, int* max_fd){
+    assert(max_fd != NULL);
+    FD_CLR(fd,fdSet);
+    if(fd == *max_fd){
+        (*max_fd)--;
+    }
+    return 0;
+}
+
 
 bool gameloop(sharedMemory* sm, int fd[2]){
-
+    
     char *loopbuffer;
     loopbuffer = getbuffer();
     if(sscanf(loopbuffer,"+ YOU %d %*s player\n",&(sm->myPlayerNr))!= 1)return false;// not enemy + set enemy to oppposite yours
@@ -21,9 +41,20 @@ bool gameloop(sharedMemory* sm, int fd[2]){
     }
 
     bool exit = false;
-    //printf("%s", loopbuffer);
-
+    
     while(!exit){
+     /*
+        fd_set readSet;
+        int max_fd= -1;
+        FD_ZERO(&readSet);
+        safe_fdSet(fd[0],&readSet,&max_fd);
+        safe_fdSet(sockfd,&readSet,&max_fd);
+    // note the max_fd+1
+    if(select(max_fd+1,&readSet,NULL,NULL,NULL)<=0){
+            perror("Select\n");
+    }else{
+    if (FD_ISSET(sockfd, &readSet)){ 
+        */
         if(strcmp(loopbuffer,"+ WAIT\n") == 0){
             toServer("OKWAIT\n");
         }
@@ -39,7 +70,7 @@ bool gameloop(sharedMemory* sm, int fd[2]){
         if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
             loopbuffer = nextbufLine();
             if(!readField(sm,loopbuffer)){
-                printf("Field could not be read");
+                printf("Field could not be read\n");
                 break;
             }
             toServer("THINKING\n");
@@ -54,14 +85,23 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             char themove[2];
             read(fd[0],themove, sizeof(themove));
             threeServer("PLAY ",themove,"\n");
-            
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move\n");
                 break;
             }
         }
-       loopbuffer = getLine();        
+       //resetLinebuf();
+       loopbuffer = getLine();     
+     /*
+    }
+  
+        if(FD_ISSET(fd[0], &readSet)){
+            char themove[2];
+            read(fd[0],themove, sizeof(themove));
+            threeServer("PLAY ",themove,"\n");
+            }   
+        }
+     */   
     }
     return false;
-
 }

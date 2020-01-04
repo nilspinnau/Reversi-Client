@@ -15,23 +15,23 @@ bool performConnection(int socketfd, char *gameId, int playerNr) {
                 if(playerNr == 1) toServer("PLAYER\n");
                 else toServer("PLAYER\n");
                 if(isnext("- No free player\n")){
-                    printf("no Playerspot availiable");
+                    printf("No Playerspot availiable\n");
                     return false;
                 }
                 
             }
             else{
-                printf("Game ID not Accepted");
+                printf("Game ID not Accepted\n");
                 return false;
             }
         }
         else{
-            printf("Version not Accepted");
+            printf("Version not Accepted\n");
             return false;
         }
     }
     else{
-        printf("Server not responding");
+        printf("Server not responding\n");
         return false;
     }
 
