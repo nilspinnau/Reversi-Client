@@ -82,8 +82,34 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             sm->thinker = getppid();
             sm->thinkFlag = true;
             kill(sm->thinker,SIGUSR1);
-            char themove[2];
+            char themove[3];
             read(fd[0],themove, sizeof(themove));
+            threeServer("PLAY ",themove,"\n");
+            if(!isnext("+ MOVEOK\n")){
+                printf("Invalid Thinker move\n");
+                break;
+            }
+        }
+        if(strcmp(loopbuffer,"+ MOVE 3000\n") == 0){ //nur beim 1. mal -Teil von größerem String
+            getLine();
+            resetLinebuf();
+            loopbuffer = nextbufLine();
+            if(!readField(sm,loopbuffer)){
+                printf("Field could not be read\n");
+                break;
+            }
+            toServer("THINKING\n");
+            if(!isnext("+ OKTHINK\n")){
+                printf("THINKING NOT ALLOWED");
+                break;
+            }
+            //thinker anstoßen
+            sm->thinker = getppid();
+            sm->thinkFlag = true;
+            kill(sm->thinker,SIGUSR1);
+            char themove[3];
+            read(fd[0],themove, sizeof(themove));
+            //printf("%s",fd[0]);
             threeServer("PLAY ",themove,"\n");
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move\n");
