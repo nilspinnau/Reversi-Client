@@ -3,8 +3,8 @@
 extern sharedMemory *sm;
 extern int fd[2];
 void signalhandler(int signum) {
-    if((signum == SIGUSR1) && (sm->thinkFlag)){
-        write(fd[1],think(sm),sizeof( think(sm)));
-        sm->thinkFlag = false;
+    if(signum == SIGUSR1) {
+        sm->thinkFlag = true;    
     }
+
 }

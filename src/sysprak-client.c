@@ -137,6 +137,10 @@ int main(int argc, char **argv) {
         signal(SIGUSR1, signalhandler);
         //ret_code = waitpid(pid, NULL, 0);
         while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0){
+            if(sm->thinkFlag){
+            write(fd[1],think(sm),sizeof( think(sm)));
+            sm->thinkFlag = false;
+            }
         }
         /*
         if (ret_code < 0) {

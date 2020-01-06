@@ -80,7 +80,6 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             }
             //thinker anstoßen
             sm->thinker = getppid();
-            sm->thinkFlag = true;
             kill(sm->thinker,SIGUSR1);
             char themove[3];
             read(fd[0],themove, sizeof(themove));
@@ -105,7 +104,6 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             }
             //thinker anstoßen
             sm->thinker = getppid();
-            sm->thinkFlag = true;
             kill(sm->thinker,SIGUSR1);
             char themove[3];
             read(fd[0],themove, sizeof(themove));
