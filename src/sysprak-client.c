@@ -27,7 +27,7 @@ char feld[8][8];
 //readfield error handle?
 
 sharedMemory *sm;
-int fd[2];
+
 int main(int argc, char **argv) {
     init();
     int opt;
@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
     }
 
     pid_t pid =0;
+    int fd[2];
     //int ret_code =0;
     fd[0]=fd[1]=0;
     
@@ -138,7 +139,7 @@ int main(int argc, char **argv) {
         //ret_code = waitpid(pid, NULL, 0);
         while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0){
             if(sm->thinkFlag){
-            write(fd[1],think(sm),sizeof( think(sm)));
+            write(fd[1],think(sm),3*sizeof(char));
             sm->thinkFlag = false;
             }
         }

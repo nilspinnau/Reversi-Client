@@ -58,8 +58,9 @@ bool gameloop(sharedMemory* sm, int fd[2]){
         if(strcmp(loopbuffer,"+ WAIT\n") == 0){
             toServer("OKWAIT\n");
         }
-        if(strcmp(loopbuffer,"GAMEOVER\n") == 0){
+        if(strcmp(loopbuffer,"+ GAMEOVER\n") == 0){
             readField(sm,loopbuffer);
+            exit= true;
             //handle who is winner
             break;
         }
@@ -75,7 +76,7 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             }
             toServer("THINKING\n");
             if(!isnext("+ OKTHINK\n")){
-                printf("THINKING NOT ALLOWED");
+                printf("THINKING NOT ALLOWED\n");
                 break;
             }
             //thinker anstoßen
@@ -99,7 +100,7 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             }
             toServer("THINKING\n");
             if(!isnext("+ OKTHINK\n")){
-                printf("THINKING NOT ALLOWED");
+                printf("THINKING NOT ALLOWED\n");
                 break;
             }
             //thinker anstoßen
@@ -107,7 +108,6 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             kill(sm->thinker,SIGUSR1);
             char themove[3];
             read(fd[0],themove, sizeof(themove));
-            //printf("%s",fd[0]);
             threeServer("PLAY ",themove,"\n");
             if(!isnext("+ MOVEOK\n")){
                 printf("Invalid Thinker move\n");
@@ -127,5 +127,5 @@ bool gameloop(sharedMemory* sm, int fd[2]){
         }
      */   
     }
-    return false;
+    return exit;
 }

@@ -125,19 +125,19 @@ int score(char board[][8], char piece){
 			if((x==0 && y==0) || (x==0 && y==7) ||
 			   (x==7 && y==0) || (x==7 && y==7) ) {
 				   if (board[x][y] == piece){
-                		total=+120;
+                		total += 120;
 			   		}	
 			}
 			if((x==2 && y==2) || (x==2 && y==5) ||
 			   (x==5 && y==2) || (x==5 && y==5) ) {
 				   if (board[x][y] == piece){
-                		total=+15;
+                		total += 15;
 				   }
 			}
 			if((x==1 && y==1) || (x==1 && y==6) ||
 			   (x==6 && y==1) || (x==6 && y==6) ) {
 				   if (board[x][y] == piece){
-                		total=-40;
+                		total -= 40;
 				   }
 			}
 			if((x==0 && y==1) || (x==1 && y==0) ||
@@ -145,7 +145,7 @@ int score(char board[][8], char piece){
 			   (x==0 && y==6) || (x==6 && y==0) ||
 			   (x==6 && y==7) || (x==7 && y==6)) {
 				   if (board[x][y] == piece){
-                		total=-20;
+                		total -= 20;
 				   }
 			}
 			if((x==0 && y==2) || (x==2 && y==0) ||
@@ -153,7 +153,7 @@ int score(char board[][8], char piece){
 			   (x==2 && y==7) || (x==7 && y==2) ||
 			   (x==7 && y==5) || (x==5 && y==7)) {
 				   if (board[x][y] == piece){
-                		total=+20;
+                		total += 20;
 				   }
 			}
 			if((x==0 && y==3) || (x==3 && y==0) ||
@@ -161,7 +161,7 @@ int score(char board[][8], char piece){
 			   (x==7 && y==3) || (x==3 && y==7) ||
 			   (x==4 && y==7) || (x==7 && y==4)){
 				   if (board[x][y] == piece){
-                		total=+5;
+                		total += 5;
 				   }
 			}
 			if((x==1 && y==2) || (x==1 && y==3) || (x==1 && y==4) || (x==1 && y==5) ||
@@ -169,14 +169,14 @@ int score(char board[][8], char piece){
 			   (x==2 && y==1) || (x==3 && y==1) || (x==4 && y==1) || (x==5 && y==1)	||
 			   (x==2 && y==6) || (x==3 && y==6) || (x==4 && y==6) || (x==5 && y==6)	) {
 				if (board[x][y] == piece){
-                		total=-5;
+                		total -= 5;
 				   }
 			}
 			if((x==2 && y==3) || (x==2 && y==4) || (x==5 && y==3) || (x==5 && y==4) ||
 			   (x==3 && y==2) || (x==3 && y==3) || (x==3 && y==4) || (x==3 && y==5)	||
 			   (x==4 && y==2) || (x==4 && y==3) || (x==4 && y==4) || (x==4 && y==5) ) {
 				if (board[x][y] == piece){
-                		total=+3;
+                		total += 3;
 				   }
 			}												
         }
