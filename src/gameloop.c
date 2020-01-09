@@ -60,7 +60,9 @@ bool gameloop(sharedMemory* sm, int fd[2]){
         }
         if(strcmp(loopbuffer,"+ GAMEOVER\n") == 0){
             readField(sm,loopbuffer);
-            exit= true;
+            while ((loopbuffer = getLine()) != NULL) {
+                
+            }
             //handle who is winner
             break;
         }
@@ -118,6 +120,7 @@ bool gameloop(sharedMemory* sm, int fd[2]){
        loopbuffer = getLine();     
      /*
     }
+
   
         if(FD_ISSET(fd[0], &readSet)){
             char themove[2];
