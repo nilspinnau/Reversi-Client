@@ -7,10 +7,10 @@ char *think(sharedMemory *sm){
     int tempY=0;
     int* x=&tempX;
     int* y=&tempY;
-    if((sm->myPlayerNr)==0){
+    if((sm->me.playerNr)==0){
         minimaxDecision(sm->spielFeld.Feld,'B',x,y);
     }
-    if((sm->myPlayerNr)==1){
+    if((sm->me.playerNr)==1){
         minimaxDecision(sm->spielFeld.Feld,'W',x,y);
     }
         switch(*x){
