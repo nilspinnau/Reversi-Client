@@ -59,7 +59,7 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             toServer("OKWAIT\n");
         }
         if(strcmp(loopbuffer,"+ GAMEOVER\n") == 0){
-            readField(sm,loopbuffer);
+           // readField(sm,loopbuffer);
             exit= true;
             //handle who is winner
             break;
@@ -70,10 +70,12 @@ bool gameloop(sharedMemory* sm, int fd[2]){
         }
         if(strcmp(loopbuffer,"+ MOVE 3000") == 0){ //nur beim 1. mal -Teil von größerem String
             loopbuffer = nextbufLine();
+            /*
             if(!readField(sm,loopbuffer)){
                 printf("Field could not be read\n");
                 break;
             }
+            */
             toServer("THINKING\n");
             if(!isnext("+ OKTHINK\n")){
                 printf("THINKING NOT ALLOWED\n");
@@ -94,10 +96,12 @@ bool gameloop(sharedMemory* sm, int fd[2]){
             getLine();
             resetLinebuf();
             loopbuffer = nextbufLine();
+           /*
             if(!readField(sm,loopbuffer)){
                 printf("Field could not be read\n");
                 break;
             }
+            */
             toServer("THINKING\n");
             if(!isnext("+ OKTHINK\n")){
                 printf("THINKING NOT ALLOWED\n");

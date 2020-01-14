@@ -4,4 +4,4 @@
 #include "../lib/handler.h"
 #endif
 
-bool readField(sharedMemory* sm,char *loopbuffer);
+bool readField(sharedMemory* sm,char *loopbuffer,char *token[256],int i );

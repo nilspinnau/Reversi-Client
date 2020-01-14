@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        if(!performConnection(sockfd,gameId,playerNr)){
+        if(!performConnection(sockfd,gameId,playerNr,fd)){
             printf("Failed Server connection\n");
             return EXIT_FAILURE;
         }
