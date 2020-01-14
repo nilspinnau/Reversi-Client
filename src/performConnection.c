@@ -1,43 +1,9 @@
 #include "../lib/performConnection.h"
 #include "../lib/handler.h"
+#include <sys/select.h>
+#include <assert.h>
 extern sharedMemory *sm;
-/*
-// vielleicht noch fehlerbehandlung von send bearbeiten
-bool performConnection(int socketfd, char *gameId, int playerNr) {
 
-    setSocket(socketfd);
-    if(isnext("+ MNM Gameserver v2.3 accepting connections\n")){
-        toServer("VERSION 2.3\n");
-        if(isnext("+ Client version accepted - please send Game-ID to join\n")){
-            threeServer("ID ", gameId, "\n");
-            if(isnext("+ PLAYING Reversi\n")){
-                getLine();
-                if(playerNr == 1) toServer("PLAYER\n");
-                else toServer("PLAYER\n");
-                if(isnext("- No free player\n")){
-                    printf("No Playerspot availiable\n");
-                    return false;
-                }
-                
-            }
-            else{
-                printf("Game ID not Accepted\n");
-                return false;
-            }
-        }
-        else{
-            printf("Version not Accepted\n");
-            return false;
-        }
-    }
-    else{
-        printf("Server not responding\n");
-        return false;
-    }
-
-    return true;
-}
-*/
 /*
 int countString(char*buffer, char*token[256]){   
     int i = 0;
@@ -50,6 +16,23 @@ int countString(char*buffer, char*token[256]){
     return i-1;
 }
 */
+/* add a fd to fd_set, and update max_fd */
+int safe_fdSet(int fd, fd_set* fdSet, int* max_fd){
+    assert(max_fd != NULL);
+    FD_SET(fd,fdSet);
+    if(fd > *max_fd){
+        *max_fd= fd;
+    }
+    return 0;
+}
+int safe_fdClear(int fd, fd_set* fdSet, int* max_fd){
+    assert(max_fd != NULL);
+    FD_CLR(fd,fdSet);
+    if(fd == *max_fd){
+        (*max_fd)--;
+    }
+    return 0;
+}
 void tokenizeshit(char* buffer, char* token[256]){
     int i  = 0;
     //char *token[256];
@@ -81,6 +64,17 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
     bool Exit= false;
     while(!Exit){
         
+    fd_set readSet;
+        int max_fd= -1;
+        FD_ZERO(&readSet);
+        safe_fdSet(fd[0],&readSet,&max_fd);
+        safe_fdSet(socketfd,&readSet,&max_fd);
+    // note the max_fd+1
+    if(select(max_fd+1,&readSet,NULL,NULL,NULL)<=0){
+            perror("Select\n");
+    }
+    if (FD_ISSET(socketfd, &readSet)){ 
+      
         read(socketfd, buffer,size);
         /*numberofString= countString(buffer,token);
         if(numberofString>0){
@@ -172,9 +166,11 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                 if(strcmp(buffer,"+ OKTHINK\n")== 0){
                     sm->thinker = getppid();
                     kill(sm->thinker,SIGUSR1);
+                    /*
                     char themove[3];
                     read(fd[0],themove, sizeof(themove));
                     threeServer("PLAY ",themove,"\n");
+                    */
                     bzero(buffer,size);
                     break;
                 }
@@ -183,6 +179,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     break;
                 }
                 if(strncmp(buffer,"+ GAMEOVER",10)==0){
+                    printf("Hi\n");
                     Exit=true;
                     bzero(buffer,size);
                     break;
@@ -207,11 +204,22 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     printf("Wrong Move\n");
                     return Exit;
                 }
+                if(strcmp(buffer,"- Internal error. Sorry & Bye\n") == 0){
+                    printf("Server malfunction\n");
+                    return Exit;
+                }    
             default:
                 return false;
             }
+            
         }
+        if(FD_ISSET(fd[0], &readSet)){
+            char themove[3];
+            read(fd[0],themove, sizeof(themove));
+            threeServer("PLAY ",themove,"\n");
+            }
+            
+    }    
     free(buffer);
     return Exit; 
-    
 }
