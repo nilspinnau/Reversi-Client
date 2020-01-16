@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
             case 'p':
                 playerNr = atoi(optarg);
                 if (playerNr < 1 || playerNr > 2) {
-                	perror("Spieleranzahl 1 oder 2");
+                	perror("Spieler 1 oder 2");
 					exit(EXIT_FAILURE);
 				}
                 break;

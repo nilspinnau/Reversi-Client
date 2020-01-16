@@ -184,7 +184,6 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
 
                 else if(strcmp(buffer,"+ MOVEOK\n") == 0){
                     bzero(buffer,size);
-                    
                 }
 
                 else if(strncmp(buffer,"+ GAMEOVER",10)==0){
