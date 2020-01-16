@@ -17,26 +17,17 @@ bool readField(sharedMemory* sm,char *loopbuffer) {
     return true;
 }
 */
-bool readField(sharedMemory* sm,char *buffer, char *token[256],int i) {
-    buffer=token[i];
-    if(strcmp(buffer,"+ FIELD 8,8")!=0){
-        return false;
-    }    
-   
-    for(int row = 7;row >= 0;row--){
-        buffer = token[i+1];
-      
+bool readField(sharedMemory* sm,char *buffer, char *token[256],int tokenIndex) {
+     for(int row = 7;row >= 0;row--){
+        buffer = token[tokenIndex];
+        printf("S:%s\n", buffer);
         sscanf(buffer,"+ %*d %c %c %c %c %c %c %c %c",
         &(sm->spielFeld.Feld[row][0]),&(sm->spielFeld.Feld[row][1]),
         &(sm->spielFeld.Feld[row][2]),&(sm->spielFeld.Feld[row][3]),
         &(sm->spielFeld.Feld[row][4]),&(sm->spielFeld.Feld[row][5]),
         &(sm->spielFeld.Feld[row][6]),&(sm->spielFeld.Feld[row][7]));
-        i++ ;
+        tokenIndex++ ;
        
-    }
-    buffer=token[i+1];
-    if(strcmp(buffer,"+ ENDFIELD")!=0){
-        return false;
     }
     return true;
 }

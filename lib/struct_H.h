@@ -16,7 +16,7 @@
 typedef struct player{
     int playerNr;
     char playerName[256];
-    bool registered;
+    int registered;
 } player;
 
 typedef struct spielFeld{
