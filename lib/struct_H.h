@@ -15,8 +15,8 @@
 
 typedef struct player{
     int playerNr;
-    char playerName[10];
-    bool registered;
+    char playerName[256];
+    int registered;
 } player;
 
 typedef struct spielFeld{
@@ -28,9 +28,8 @@ typedef struct spielFeld{
 typedef struct sharedMemory{
     volatile bool thinkFlag;
     struct spielFeld spielFeld;
-    struct player me;
     struct player enemy;
-    int myPlayerNr;
+    struct player me;
     int playerCount;
 	char gameName[10];
     pid_t thinker;

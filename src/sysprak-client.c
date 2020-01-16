@@ -5,7 +5,6 @@
 #include "../lib/performConnection.h"
 #include "../lib/getconfig.h"
 #include "../lib/handler.h"
-#include "../lib/gameloop.h"
 #include "../lib/readField.h"
 #include "../lib/think.h"
 #endif
@@ -159,18 +158,10 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        if(!performConnection(sockfd,gameId,playerNr)){
+        if(!performConnection(sockfd,gameId,playerNr,fd)){
             printf("Failed Server connection\n");
             return EXIT_FAILURE;
-        }
-        if(gameloop(sm,fd)){
-            printf("Game finito\n");
-            return EXIT_SUCCESS;
-        }
-        else{
-            printf("Game finito Fehler\n");
-            return EXIT_FAILURE;
-        }
+        }    
     }
     shmdt((void*)sm);
     shmctl(shm_id, IPC_RMID, NULL);

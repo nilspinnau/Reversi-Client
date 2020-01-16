@@ -59,6 +59,5 @@ configs *getconfig(configs *res, char * path){
     */
     free(line);
     free(varstr);
-    fclose(fp);
     return res;
 }

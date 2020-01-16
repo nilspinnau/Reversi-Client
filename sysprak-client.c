@@ -6,8 +6,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+<<<<<<< HEAD
+#include <sys/wait.h>
+#include <sys/shm.h>
+=======
 #include <getopt.h>
 #include <sys/wait.h>
+>>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
 #include "performConnection.h"
 
 #define GAMEKINDNAME "Reversi"
@@ -23,6 +28,19 @@ int main(int argc, char **argv) {
     while ((opt = getopt (argc, argv, "g:p:")) != -1) {
         switch (opt) {
             case 'g':
+<<<<<<< HEAD
+ 	            gameId = optarg;
+		    if (strlen(gameId) != 13) {
+			perror("Bitte 13-stellige Game-Id eingeben\n");
+			}
+	            break;
+            case 'p':
+                    playerNr = atoi(optarg);
+		    if (playerNr < 1 || playerNr > 2) {
+		       perror("Spieleranzahl 1 oder 2\n");
+			}
+	            break;
+=======
                 gameId = optarg;
                 if (strlen(gameId) != 13) {
 					perror("Bitte 13-stellige Game-Id eingeben");
@@ -36,6 +54,7 @@ int main(int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
                 break;
+>>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
         }
     }
     int sockfd, portno;
@@ -102,6 +121,19 @@ int main(int argc, char **argv) {
         perror ("Fehler beim Warten auf Kindprozess.");
         exit(EXIT_FAILURE);
     }  
+<<<<<<< HEAD
+}
+  /*
+   * Connector = Kindprozess
+   */
+  else {
+      // Schreibseite der Pipe schliessen
+    close(fd[1]);
+    performConnection(sockfd,gameId,playerNr);
+  }
+  
+    return 0;
+=======
     /*
     * Connector = Kindprozess
     */
@@ -111,6 +143,7 @@ int main(int argc, char **argv) {
     
     
         performConnection(sockfd,gameId,playerNr);
+>>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
     }
     return 0;
 }
