@@ -41,7 +41,7 @@ int tokenizeshit(char* buffer, char* token[100]){
         i++ ;
         token[i]= strtok(NULL,"\n");
         //printf("Dia chi cua token o vi tri i %d\n",i);
-        printf("in tokenistshit :%s\n",token[i]);
+        //printf("in tokenistshit :%s\n",token[i]);
         
     }
     return i;
@@ -59,10 +59,11 @@ int tokenizeshit(char* buffer, char* token[100]){
 }
 
 bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
-    size_t size =sizeof(char)*256;
-    char* buffer = (char*)malloc(size);
+    size_t size =512;
+    char array[size];
+    char *buffer;
+    //char *buffer = malloc(size);
     char *token[100];
-    
     for(int j= 0; j<=20;j++ ){
         token[j]= malloc(size);
     }
@@ -83,15 +84,15 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
             perror("Select\n");
     }
     if (FD_ISSET(socketfd, &readSet)){ 
-        
+        buffer = array;
         bzero(buffer, size);
         read(socketfd, buffer,size);
         // Get data
         //
-        printf("This is in buffer: %s",buffer);
+        //printf("This is in buffer: %s",buffer);
         numberofToken= tokenizeshit(buffer,token);
         for (tokenIndex=0; tokenIndex<numberofToken; tokenIndex++) {
-            buffer= token[tokenIndex] ;
+            buffer = token[tokenIndex] ;
             //printf("%d\n", tokenIndex );
             //printf("S:%s\n",token[tokenIndex]);
             
@@ -253,10 +254,12 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     printf("S:%s\n", buffer);
                     break;
                 }
+                /*
                 if(strncmp(buffer,"+",1) == 0){
                     printf("S:%s qưqưqư\n", buffer);
                     break;
                 }
+                */
                 if(strncmp(buffer,"+ PLAYER1WON",12) == 0){
                     printf("S:%s\n", buffer);
                     break;
