@@ -66,7 +66,7 @@ bool gameloop(sharedMemory* sm, int fd[2]){
                     printf("Client hat gewonnen");
                 }
                 else {
-                    char playerName[10] = sm->enemy.playerName;
+                    char playerName[10] = sm.enemy.playerName;
                     printf("%s hat gewonnen", playerName);
                 }
 
