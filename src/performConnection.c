@@ -72,6 +72,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
     int tokenIndex;
     //char* line= malloc(size);
     bool Exit= false;
+    bool gameover=false;
     while(!Exit){
         
     fd_set readSet;
@@ -87,6 +88,8 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
         buffer = array;
         bzero(buffer, size);
         read(socketfd, buffer,size);
+
+        //printf("inbuffer: %s\n", buffer);
         // Get data
         //
         //printf("This is in buffer: %s",buffer);
@@ -105,30 +108,30 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     toServer("VERSION 2.3\n");
                    //printf("Dia chi con tro %d\n", *buffer);
                     //bzero(buffer, size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ Client version accepted - please send Game-ID to join") == 0){
+                else if(strcmp(buffer,"+ Client version accepted - please send Game-ID to join") == 0){
                     printf("S:%s\n", buffer);
                     threeServer("ID ", gameId, "\n");
                     //bzero(buffer, size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ PLAYING Reversi") == 0){
+                else if(strcmp(buffer,"+ PLAYING Reversi") == 0){
                     printf("S:%s\n", buffer);
                     //printf("Dia chi con tro %d\n", *buffer);
                     //bzero(buffer, size);
-                    break;
+                    
                 }
-                if(strncmp(buffer,"+ Game from",11) == 0){
+                else if(strncmp(buffer,"+ Game from",11) == 0){
                     printf("S:%s\n", buffer);
                     if(playerNr == 1 || playerNr ==2 ){
                          toServer("PLAYER\n");
                     }
                     //printf("Dia chi con tro %d\n", *buffer);    
                     //bzero(buffer, size);
-                    break;
+                    
                 }
-                if(strncmp(buffer,"+ YOU",5) == 0){
+                else if(strncmp(buffer,"+ YOU",5) == 0){
                     printf("S:%s\n", buffer);
                     if(sscanf(buffer,"+ YOU %d %s player",&(sm->me.playerNr), sm->me.playerName)!= 2){
                         return false;
@@ -136,9 +139,8 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     //printf("Dia chi con tro %d\n", *buffer);
                     //bzero(buffer, size);
 
-                    break;
                 }
-                if(strncmp(buffer,"+ TOTAL",7) == 0){
+                else if(strncmp(buffer,"+ TOTAL",7) == 0){
                     printf("S:%s\n", buffer);
                      /*
                     if(sm->me.playerNr == 0){
@@ -148,36 +150,36 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     */
                     //printf("Dia chi con tro %d\n", *buffer);
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strncmp(buffer,"+ 1 \"White\" ",12) == 0){
+                else if(strncmp(buffer,"+ 1 \"White\" ",12) == 0){
                     printf("S:%s\n", buffer);
                     if(sscanf(buffer,"+ %d %s player %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
                         return false;
                     }
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strncmp(buffer,"+ 0 \"Black\" ",12) == 0){
+                else if(strncmp(buffer,"+ 0 \"Black\" ",12) == 0){
                     printf("S:%s\n", buffer);
                     if(sscanf(buffer,"+ %d %s player %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
                         return false;
                     }
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ ENDPLAYERS") == 0){
+                else if(strcmp(buffer,"+ ENDPLAYERS") == 0){
                     printf("S:%s\n", buffer);
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ WAIT") == 0){
+                else if(strcmp(buffer,"+ WAIT") == 0){
                     printf("S:%s\n", buffer);
                     toServer("OKWAIT\n");
                     bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ MOVE 3000") == 0){ 
+                else if(strcmp(buffer,"+ MOVE 3000") == 0){ 
                     printf("S:%s\n", buffer);
                  /*
                     tokenizeshit(buffer,token);
@@ -185,7 +187,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     toServer("THINKING\n");
                   */ 
                     //bzero(buffer,size);
-                    break;
+                    
                 }
                 /*
                 if(strncmp(buffer,"+ MOVE 3000",11) == 0){ 
@@ -197,11 +199,12 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     break;
                 }
                 */
-                if(strcmp(buffer,"+ FIELD 8,8") == 0){ 
+                else if(strcmp(buffer,"+ FIELD 8,8") == 0){ 
                     printf("S:%s\n", buffer);
                     //tokenizeshit(buffer,token);
                     //readField(sm,buffer,token,tokenIndex+1);
                     //tokenIndex++;
+                    /*
                     for(int row = 7;row >= 0;row--){
                         tokenIndex++ ;
                         buffer = token[tokenIndex];
@@ -213,21 +216,35 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         &(sm->spielFeld.Feld[row][6]),&(sm->spielFeld.Feld[row][7]));
                         
                     }
+                    */
                      //toServer("THINKING\n");
                     //bzero(buffer,size);
                     //printf("tokenIndex ist:%d\n", tokenIndex);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ ENDFIELD") == 0){
+                else if(isdigit(buffer[2]) && buffer[4] != '\"') {
+                    // lese zeilennummer ein
+                    printf("jetzt kommt zeile %i\n", buffer[2] - '0');
+                    // schreibe feld in shm
+                    int row = buffer[2] - '0' - 1;
+                    printf("S:%s\n", buffer);
+                    sscanf(buffer,"+ %*d %c %c %c %c %c %c %c %c",
+                        &(sm->spielFeld.Feld[row][0]),&(sm->spielFeld.Feld[row][1]),
+                        &(sm->spielFeld.Feld[row][2]),&(sm->spielFeld.Feld[row][3]),
+                        &(sm->spielFeld.Feld[row][4]),&(sm->spielFeld.Feld[row][5]),
+                        &(sm->spielFeld.Feld[row][6]),&(sm->spielFeld.Feld[row][7]));
+                    
+                }
+                else if(strcmp(buffer,"+ ENDFIELD") == 0){
                     printf("S:%s\n", buffer);
                     //bzero(buffer,size);
-                    if(!Exit){
+                    
+                    if(!gameover){
                     toServer("THINKING\n");
                     }
-                    break;
                 }
 
-                if(strcmp(buffer,"+ OKTHINK")== 0){
+                else if(strcmp(buffer,"+ OKTHINK")== 0){
                     printf("S:%s\n", buffer);
                     sm->thinker = getppid();
                     kill(sm->thinker,SIGUSR1);
@@ -237,22 +254,22 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     threeServer("PLAY ",themove,"\n");
                     */
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ MOVEOK") == 0){
+                else if(strcmp(buffer,"+ MOVEOK") == 0){
                     printf("S:%s\n", buffer);
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strcmp(buffer,"+ GAMEOVER")==0){
+                else if(strcmp(buffer,"+ GAMEOVER")==0){
                     printf("S:%s\n", buffer);
-                    Exit=true;
+                    gameover=true;
                     //bzero(buffer,size);
-                    break;
+                    
                 }
-                if(strncmp(buffer,"+ PLAYER0WON",12) == 0){
+                else if(strncmp(buffer,"+ PLAYER0WON",12) == 0){
                     printf("S:%s\n", buffer);
-                    break;
+                    
                 }
                 /*
                 if(strncmp(buffer,"+",1) == 0){
@@ -260,15 +277,15 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     break;
                 }
                 */
-                if(strncmp(buffer,"+ PLAYER1WON",12) == 0){
+                else if(strncmp(buffer,"+ PLAYER1WON",12) == 0){
                     printf("S:%s\n", buffer);
-                    break;
                 }
-                if(strcmp(buffer,"+ QUIT")==0){
+                else if(strcmp(buffer,"+ QUIT")==0){
                     printf("S:%s\n", buffer);
                     exit(EXIT_SUCCESS);
                     return Exit;
                 }
+                break;
             case '-':
                 if(strcmp(buffer,"- TIMEOUT Be faster next time") == 0){
                     printf("S:%s\n", buffer);
@@ -276,29 +293,30 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     exit(EXIT_FAILURE);
                     return Exit;
                 }    
-                if(strcmp(buffer,"- No free player") == 0){
+                else if(strcmp(buffer,"- No free player") == 0){
                     printf("S:%s\n", buffer);
                     printf("No Player available\n");
                     exit(EXIT_FAILURE);
                     return Exit;
                 }
-                if(strcmp(buffer,"- Did not expect response from client") == 0){
+                else if(strcmp(buffer,"- Did not expect response from client") == 0){
                     printf("S:%s\n", buffer);
                     printf("Wrong response\n");
                     exit(EXIT_FAILURE);
                     return Exit;
                 }
-                if(strcmp(buffer,"- Invalid Move: Invalid position") == 0){
+                else if(strcmp(buffer,"- Invalid Move: Invalid position") == 0){
                     printf("S:%s\n", buffer);
                     printf("Wrong Move\n");
                     exit(EXIT_FAILURE);
                     return Exit;
                 }
-                if(strcmp(buffer,"- Internal error. Sorry & Bye\n") == 0){
+                else if (strcmp(buffer,"- Internal error. Sorry & Bye\n") == 0){
                     printf("S:%s\n", buffer);
                     printf("Server malfunction\n");
                     return Exit;
                 }    
+                break;
             default:
                 return false;
             }
