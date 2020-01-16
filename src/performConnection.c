@@ -89,37 +89,33 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                 if(strcmp(buffer,"+ MNM Gameserver v2.3 accepting connections\n") == 0){
                     toServer("VERSION 2.3\n");
                     bzero(buffer, size);
-                    
+                    break;
                 }
-
-                else if(strcmp(buffer,"+ Client version accepted - please send Game-ID to join\n") == 0){
+                if(strcmp(buffer,"+ Client version accepted - please send Game-ID to join\n") == 0){
                     threeServer("ID ", gameId, "\n");
                     bzero(buffer, size);
-                }                   
-
-                else if(strcmp(buffer,"+ PLAYING Reversi\n") == 0){
-                    bzero(buffer, size);
-                    
+                    break;
                 }
-
-                else if(strncmp(buffer,"+ Game from",11) == 0){
+                if(strcmp(buffer,"+ PLAYING Reversi\n") == 0){
+                    bzero(buffer, size);
+                    break;
+                }
+                if(strncmp(buffer,"+ Game from",11) == 0){
                     if(playerNr == 1 || playerNr ==2 ){
                          toServer("PLAYER\n");
                     }
                     bzero(buffer, size);
-                    
+                    break;
                 }
-
-                else if(strncmp(buffer,"+ YOU",5) == 0){
+                if(strncmp(buffer,"+ YOU",5) == 0){
 
                     if(sscanf(buffer,"+ YOU %d %s player",&(sm->me.playerNr), sm->me.playerName)!= 2){
                         return false;
                     }
                     bzero(buffer, size);
-                    
+                    break;
                 }
-
-                else if(strncmp(buffer,"+ TOTAL",7) == 0){
+                if(strncmp(buffer,"+ TOTAL",7) == 0){
                     tokenizeshit(buffer,token);
                     buffer=token[1];
                     if(sscanf(buffer,"+ %d %s player %*d",&(sm->enemy.playerNr),sm->enemy.playerName)!= 2){
@@ -133,44 +129,41 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     
                     bzero(buffer,size);
                     //bzero(token,size);
-                    
+                    break;
                 }
-
-                else if(strcmp(buffer,"+ WAIT\n") == 0){
+                if(strcmp(buffer,"+ WAIT\n") == 0){
                     toServer("OKWAIT\n");
                     bzero(buffer,size);
                  
-                    
+                    break;
                 }
-
-                else if(strcmp(buffer,"+ MOVE 3000\n") == 0){ 
+                if(strcmp(buffer,"+ MOVE 3000\n") == 0){ 
                  /*
                     tokenizeshit(buffer,token);
                     readField(sm,buffer,token,1);
                     toServer("THINKING\n");
                   */ 
                     bzero(buffer,size);
-                    
+                    break;
                 }
-
-                else if(strncmp(buffer,"+ MOVE 3000",11) == 0){ 
+                if(strncmp(buffer,"+ MOVE 3000",11) == 0){ 
                  
                     tokenizeshit(buffer,token);
                     readField(sm,buffer,token,1);
                     toServer("THINKING\n");
                     bzero(buffer,size);
-                   
+                    break;
                 }
 
-                else if(strncmp(buffer,"+ FIELD 8,8", 11) == 0){ 
+                if(strncmp(buffer,"+ FIELD 8,8", 11) == 0){ 
                     tokenizeshit(buffer,token);
                     readField(sm,buffer,token,0);
                     toServer("THINKING\n");
                     bzero(buffer,size);
-                    
+                    break;
                 }
-   
-                else if(strcmp(buffer,"+ OKTHINK\n")== 0){
+                        
+                if(strcmp(buffer,"+ OKTHINK\n")== 0){
                     sm->thinker = getppid();
                     kill(sm->thinker,SIGUSR1);
                     /*
@@ -179,20 +172,19 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     threeServer("PLAY ",themove,"\n");
                     */
                     bzero(buffer,size);
-                    
+                    break;
                 }
-
-                else if(strcmp(buffer,"+ MOVEOK\n") == 0){
+                if(strcmp(buffer,"+ MOVEOK\n") == 0){
                     bzero(buffer,size);
+                    break;
                 }
-
-                else if(strncmp(buffer,"+ GAMEOVER",10)==0){
+                if(strncmp(buffer,"+ GAMEOVER",10)==0){
                     printf("Hi\n");
                     Exit=true;
                     bzero(buffer,size);
-                    
+                    break;
                 }
-                break;
+
             case '-':
                 if(strcmp(buffer,"- TIMEOUT Be faster next time\n") == 0){
                     printf("Timeout -> Exiting Programm\n");
@@ -212,25 +204,20 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     printf("Wrong Move\n");
                     return Exit;
                 }
-                /*
                 if(strcmp(buffer,"- Internal error. Sorry & Bye\n") == 0){
                     printf("Server malfunction\n");
                     return Exit;
-                }
-                
+                }    
             default:
                 return false;
-                */
             }
-            
             
         }
         if(FD_ISSET(fd[0], &readSet)){
             char themove[3];
             read(fd[0],themove, sizeof(themove));
             threeServer("PLAY ",themove,"\n");
-            }
-            
+            }  
     }    
     free(buffer);
     return Exit; 
