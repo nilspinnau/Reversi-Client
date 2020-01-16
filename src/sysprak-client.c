@@ -5,7 +5,6 @@
 #include "../lib/performConnection.h"
 #include "../lib/getconfig.h"
 #include "../lib/handler.h"
-#include "../lib/readField.h"
 #include "../lib/think.h"
 #endif
 
@@ -28,7 +27,6 @@ char feld[8][8];
 sharedMemory *sm;
 
 int main(int argc, char **argv) {
-    init();
     int opt;
     char gameId[14];
     int playerNr;
@@ -51,8 +49,8 @@ int main(int argc, char **argv) {
                 break;
             case 'p':
                 playerNr = atoi(optarg);
-                if (playerNr < 0 || playerNr > 1) {
-                	printf("Spieler 1 oder 0\n");
+                if (playerNr < 1 || playerNr > 2) {
+                	printf("Spieler 1 oder 2\n");
 					exit(EXIT_FAILURE);
 				}
                 break;

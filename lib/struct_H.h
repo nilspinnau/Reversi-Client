@@ -30,7 +30,7 @@ typedef struct sharedMemory{
     struct spielFeld spielFeld;
     struct player enemy;
     struct player me;
-    int playerCount;
+    //int playerCount;
 	char gameName[10];
     pid_t thinker;
     pid_t connector;
