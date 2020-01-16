@@ -61,9 +61,19 @@ bool gameloop(sharedMemory* sm, int fd[2]){
         if(strcmp(loopbuffer,"+ GAMEOVER\n") == 0){
             readField(sm,loopbuffer);
             while ((loopbuffer = getLine()) != NULL) {
-                
+                loopbuffer = nextbufLine();
+                if(strcmp(loopbuffer,"+ PLAYER0WON")!=0) {
+                    printf("Client hat gewonnen");
+                }
+                else {
+                    char playerName[10] = sm->enemy.playerName;
+                    printf("%s hat gewonnen", playerName);
+                }
+
+                    
             }
-            //handle who is winner
+            //handle winner
+
             break;
         }
         if(strcmp(loopbuffer,"- TIMEOUT Be faster next time\n") == 0){
