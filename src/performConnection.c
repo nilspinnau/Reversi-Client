@@ -21,7 +21,7 @@ int safe_fdClear(int fd, fd_set* fdSet, int* max_fd){
     }
     return 0;
 }
-int tokenizeshit(char* buffer, char* token[100]){
+int tokenizeshit(char* buffer, char* token[20]){
     int i  = 0;
     token[0]=strtok(buffer, "\n");
     while((token[i]) !=NULL){
@@ -106,23 +106,26 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                             //bzero(buffer,size);
                             
                         }
-                        else if(strncmp(buffer,"+ 1 \"White\" ",12) == 0){
-                            if(sscanf(buffer,"+ %d %s player %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
+                        else if(strncmp(buffer,"+ 1 \"W",6) == 0){
+                            printf("SWHITE:%s\n", buffer);
+                            if(sscanf(buffer,"+ %d %s %*s %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
                                 return false;
                             }
-                            if(sm->me.registered){
+                            printf("SWHITE:%s\n", buffer);
+                            if(sm->me.registered == 1){
                                 printf("C: Player %d (%s) is ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
                             }else{
                                 printf("C: Player %d (%s) ist not ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
                             }
                             //bzero(buffer,size);
                         }
-                        else if(strncmp(buffer,"+ 0 \"Black\" ",12) == 0){
-                            //printf("S:%s\n", buffer);
-                            if(sscanf(buffer,"+ %d %s player %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
+                        else if(strncmp(buffer,"+ 0 \"B",6) == 0){
+                            printf("S:%s\n", buffer);
+                            if(sscanf(buffer,"+ %d %s %*s %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
                                 return false;
                             }
-                            if(sm->me.registered){
+                            printf("SBLACK:%s\n", buffer);
+                            if(sm->me.registered == 1){
                                 printf("C: Player %d (%s) is ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
                             }else{
                                 printf("C: Player %d (%s) ist not ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
