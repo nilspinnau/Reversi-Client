@@ -4,6 +4,7 @@
 bool checkFlip(char board[][8], int x, int y, int deltaX, int deltaY, 
 	           char myPiece, char opponentPiece){
 	
+	// has to be done like this because otherwise line 11 wouldnt work because it could happen thath x < 0 or ...
 	if(!((x >= 0) && (x < 8) && (y >= 0) && (y < 8))) {
 		return false;
 	}

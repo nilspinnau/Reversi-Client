@@ -11,11 +11,11 @@ all: sysprak-client
 sysprak-client: $(OBJ)
 	$(CC) $(CFLAGS) $(VAL) -o sysprak-client $(OBJ)
 
-play: 
+play: sysprak-client
 	./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
 
 valgrind: sysprak-client
-	valgrind --leak-check=full --trace-children=yes --show-leak-kinds=all --track-origins=yes ./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
+	valgrind --leak-check=full --trace-children=yes --show-leak-kinds=all --track-origins=yes -v ./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
 
 clean:
 	rm -f *.o sysprak-client 
