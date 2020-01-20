@@ -57,6 +57,7 @@ configs *getconfig(configs *res, char * path){
     }
     //htons(res.port_nr);
     */
+    fclose(fp);
     free(line);
     free(varstr);
     return res;

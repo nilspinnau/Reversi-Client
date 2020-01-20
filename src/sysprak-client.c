@@ -5,7 +5,6 @@
 #include "../lib/performConnection.h"
 #include "../lib/getconfig.h"
 #include "../lib/handler.h"
-#include "../lib/readField.h"
 #include "../lib/think.h"
 #endif
 
@@ -51,8 +50,8 @@ int main(int argc, char **argv) {
                 break;
             case 'p':
                 playerNr = atoi(optarg);
-                if (playerNr < 0 || playerNr > 1) {
-                	printf("Spieler 1 oder 0\n");
+                if (playerNr < 1 || playerNr > 2) {
+                	printf("Spieler 1 oder 2\n");
 					exit(EXIT_FAILURE);
 				}
                 break;
@@ -138,8 +137,8 @@ int main(int argc, char **argv) {
         //ret_code = waitpid(pid, NULL, 0);
         while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0){
             if(sm->thinkFlag){
-            write(fd[1],think(sm),3*sizeof(char));
-            sm->thinkFlag = false;
+                write(fd[1],think(sm),3*sizeof(char));
+                sm->thinkFlag = false;
             }
         }
         /*
