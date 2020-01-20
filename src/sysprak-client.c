@@ -27,11 +27,10 @@ char feld[8][8];
 sharedMemory *sm;
 
 int main(int argc, char **argv) {
-    init();
     int opt;
     char gameId[14];
     int playerNr;
-    char path[256];
+    char path[256] = {0};
     strcpy(path,"config.conf\n");
     configs res;
     configs* rp;
@@ -45,7 +44,7 @@ int main(int argc, char **argv) {
 					exit(EXIT_FAILURE);
                 }
                 else {
-                strcpy(gameId, optarg);
+                    strcpy(gameId, optarg);
                 } 
                 break;
             case 'p':
@@ -56,9 +55,8 @@ int main(int argc, char **argv) {
 				}
                 break;
             case 'f':
-                //bzero((char*) &path, sizeof(path));
+                bzero((char*) &path, sizeof(path));
                 strcpy(path,optarg);
-                 
                 break;    
         }
     }
@@ -157,11 +155,9 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        if(!performConnection(sockfd,gameId,playerNr,fd)){
-            printf("Failed Server connection\n");
-            return EXIT_FAILURE;
-        }    
+        performConnection(sockfd,gameId,playerNr,fd); 
     }
+
     shmdt((void*)sm);
     shmctl(shm_id, IPC_RMID, NULL);
     close(sockfd);
