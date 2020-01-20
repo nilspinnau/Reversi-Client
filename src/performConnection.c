@@ -193,7 +193,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     readField(sm,buffer,token,1);
                     toServer("THINKING\n");
                     bzero(buffer,size);
-                    break;
+                   
                 }
                 */
                 if(strcmp(buffer,"+ FIELD 8,8") == 0){ 
@@ -291,13 +291,16 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     exit(EXIT_FAILURE);
                     return Exit;
                 }
+                /*
                 if(strcmp(buffer,"- Internal error. Sorry & Bye\n") == 0){
                     printf("S:%s\n", buffer);
                     printf("Server malfunction\n");
                     return Exit;
-                }    
+                }
+                
             default:
                 return false;
+                */
             }
         }
         }
