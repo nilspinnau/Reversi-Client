@@ -8,10 +8,26 @@ char *think(sharedMemory *sm){
     int* x=&tempX;
     int* y=&tempY;
     if((sm->me.playerNr)==0){
-        minimaxDecision(sm->spielFeld.Feld,'B',x,y);
+        // minimaxDecision(sm->spielFeld.Feld,'B',x,y);
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                if(validMove(sm->spielFeld.Feld, i, j, 'B')) {
+                    *x = i;
+                    *y = j;
+                }
+            }
+        }
     }
     if((sm->me.playerNr)==1){
-        minimaxDecision(sm->spielFeld.Feld,'W',x,y);
+        // minimaxDecision(sm->spielFeld.Feld,'W',x,y);
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                if(validMove(sm->spielFeld.Feld, i, j, 'W')) {
+                    *x = i;
+                    *y = j;
+                }
+            }
+        }
     }
     switch(*x){
         case 0: 
