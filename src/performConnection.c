@@ -248,7 +248,7 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         //bzero(buffer,size);
                         //printf("tokenIndex ist:%d\n", tokenIndex);
                         
-                    }else if(isdigit(buffer[2]) && isdigit(buffer[strlen[buffer] - 1])) {
+                    }else if(isdigit(buffer[2]) && isdigit(buffer[strlen(buffer) - 1])) {
                         printf("S: %s\n", buffer);
                         readOpponent(buffer);
                     }
