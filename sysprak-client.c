@@ -102,19 +102,6 @@ int main(int argc, char **argv) {
         perror ("Fehler beim Warten auf Kindprozess.");
         exit(EXIT_FAILURE);
     }  
-<<<<<<< HEAD
-}
-  /*
-   * Connector = Kindprozess
-   */
-  else {
-      // Schreibseite der Pipe schliessen
-    close(fd[1]);
-    performConnection(sockfd,gameId,playerNr);
-  }
-  
-    return 0;
-=======
     /*
     * Connector = Kindprozess
     */
@@ -124,7 +111,6 @@ int main(int argc, char **argv) {
     
     
         performConnection(sockfd,gameId,playerNr);
->>>>>>> a36bb67b495e26763725d7a24e2028f7fc454272
     }
     return 0;
 }

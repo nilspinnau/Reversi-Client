@@ -3,6 +3,11 @@
 // Checks a direction from x,y to see if we can make a move
 bool checkFlip(char board[][8], int x, int y, int deltaX, int deltaY, 
 	           char myPiece, char opponentPiece){
+	
+	// has to be done like this because otherwise line 11 wouldnt work because it could happen thath x < 0 or ...
+	if(!((x >= 0) && (x < 8) && (y >= 0) && (y < 8))) {
+		return false;
+	}
 	if (board[x][y] == opponentPiece)
 	{
 		while ((x >= 0) && (x < 8) && (y >= 0) && (y < 8))
@@ -226,7 +231,7 @@ void minimaxDecision(char board[][8], char whoseTurn, int* x, int* y)
 {   
     
 	int moveX[60], moveY[60];
-	int numMoves=0;
+	int numMoves= 0;
 	char opponent = 'W';
 	if (whoseTurn == 'W')
 		opponent = 'B';
@@ -272,11 +277,12 @@ void minimaxDecision(char board[][8], char whoseTurn, int* x, int* y)
 // calculate the heuristic. currentTurn flips between W and B.
 int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searchPly)
 {
-	if (searchPly == 5) // Change to desired ply lookahead
+	if (searchPly == 3) // Change to desired ply lookahead
 	{
 		return heuristic(board, originalTurn); // Termination criteria
 	}
-	int moveX[60], moveY[60];
+	int moveX[60] = {0};
+	int moveY[60] = {0};
 	int numMoves=0;
 	char opponent = 'W';
 	if (currentTurn == 'W')
@@ -297,7 +303,7 @@ int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searc
 		for (int i = 0; i < numMoves; i++)
 		{
 			// Apply the move to a new board
-			char tempBoard[8][8];
+			char tempBoard[8][8] = {0};
 			copyBoard(board, tempBoard);
 			makeMove(tempBoard, moveX[i], moveY[i], currentTurn);
 			// Recursive call

@@ -6,5 +6,4 @@ void signalhandler(int signum) {
     if(signum == SIGUSR1) {
         sm->thinkFlag = true;    
     }
-
 }
