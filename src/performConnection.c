@@ -299,11 +299,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
             default:
                 return false;
             }
-<<<<<<< HEAD
-            
-=======
         }
->>>>>>> ef8015269107bf15322e68f02c03be98e70da2b5
         }
         if(FD_ISSET(fd[0], &readSet)){
             char themove[3];
