@@ -17,8 +17,12 @@ configs *getconfig(configs *res, char * path){
     FILE *fp;
     printf("%s",path);
     
-    fp = fopen("config.conf","r+");
+
+    // has to be changed to path, throws error that path cant be found
+    fp = fopen("config.conf", "r+");
     if(fp == NULL){
+        free(varstr);
+        free(line);
         perror("Cant open file");
         return NULL;
     }
@@ -57,6 +61,7 @@ configs *getconfig(configs *res, char * path){
     }
     //htons(res.port_nr);
     */
+    fclose(fp);
     free(line);
     free(varstr);
     return res;

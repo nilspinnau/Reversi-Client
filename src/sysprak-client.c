@@ -5,7 +5,6 @@
 #include "../lib/performConnection.h"
 #include "../lib/getconfig.h"
 #include "../lib/handler.h"
-#include "../lib/readField.h"
 #include "../lib/think.h"
 #endif
 
@@ -28,11 +27,10 @@ char feld[8][8];
 sharedMemory *sm;
 
 int main(int argc, char **argv) {
-    init();
     int opt;
     char gameId[14];
     int playerNr;
-    char path[256];
+    char path[256] = {0};
     strcpy(path,"config.conf\n");
     configs res;
     configs* rp;
@@ -46,20 +44,19 @@ int main(int argc, char **argv) {
 					exit(EXIT_FAILURE);
                 }
                 else {
-                strcpy(gameId, optarg);
+                    strcpy(gameId, optarg);
                 } 
                 break;
             case 'p':
                 playerNr = atoi(optarg);
-                if (playerNr < 0 || playerNr > 1) {
-                	printf("Spieler 1 oder 0\n");
+                if (playerNr < 1 || playerNr > 2) {
+                	printf("Spieler 1 oder 2\n");
 					exit(EXIT_FAILURE);
 				}
                 break;
             case 'f':
-                //bzero((char*) &path, sizeof(path));
+                bzero((char*) &path, sizeof(path));
                 strcpy(path,optarg);
-                 
                 break;    
         }
     }
@@ -138,8 +135,8 @@ int main(int argc, char **argv) {
         //ret_code = waitpid(pid, NULL, 0);
         while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0){
             if(sm->thinkFlag){
-            write(fd[1],think(sm),3*sizeof(char));
-            sm->thinkFlag = false;
+                write(fd[1],think(sm),3*sizeof(char));
+                sm->thinkFlag = false;
             }
         }
         /*
@@ -158,11 +155,9 @@ int main(int argc, char **argv) {
     else {
         // Schreibseite der Pipe schliessen
         close(fd[1]);
-        if(!performConnection(sockfd,gameId,playerNr,fd)){
-            printf("Failed Server connection\n");
-            return EXIT_FAILURE;
-        }    
+        performConnection(sockfd,gameId,playerNr,fd); 
     }
+
     shmdt((void*)sm);
     shmctl(shm_id, IPC_RMID, NULL);
     close(sockfd);
