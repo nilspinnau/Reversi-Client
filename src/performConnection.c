@@ -248,8 +248,11 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         //bzero(buffer,size);
                         //printf("tokenIndex ist:%d\n", tokenIndex);
                         
+                    }else if(isdigit(buffer[2]) && isdigit(buffer[strlen[buffer] - 1])) {
+                        printf("S: %s\n", buffer);
+                        readOpponent(buffer);
                     }
-                    else if(isdigit(buffer[2]) && (buffer[4] == 'W' || buffer[4] == 'B' || buffer[4] == '*')) {
+                    else if(isdigit(buffer[2]) /* && (buffer[4] == 'W' || buffer[4] == 'B' || buffer[4] == '*') */) {
                         // lese zeilennummer ein
                         printf("jetzt kommt zeile %i\n", buffer[2] - '0');
                         // schreibe feld in shm
@@ -262,10 +265,7 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                             &(sm->spielFeld.Feld[row][6]),&(sm->spielFeld.Feld[row][7]));
                         
                     }
-                    else if(isdigit(buffer[2])) {
-                        printf("S: %s\n", buffer);
-                        readOpponent(buffer);
-                    }
+                    
 
                     else if(strcmp(buffer,"+ ENDFIELD") == 0){
                         printf("S:%s\n", buffer);
