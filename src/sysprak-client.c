@@ -25,20 +25,26 @@ char feld[8][8];
 //readfield error handle?
 
 sharedMemory *sm;
+int fd[2];
 
 int main(int argc, char **argv) {
     int opt;
-    char gameId[14];
+    char gameId[14] = {0};
     int playerNr;
     char path[256] = {0};
-    strcpy(path,"config.conf\n");
+    strcpy(path,"config.conf");
     configs res;
     configs* rp;
     memset(&res,0,sizeof(configs));
 
+    // flags
+    bool gFlag = false;
+    bool pFlag = false;
+
     while ((opt = getopt (argc, argv, "g:p:f:")) != -1) {
         switch (opt) {
             case 'g':
+                gFlag = true;
                 if (strlen(optarg) != 13) {
 					printf("Bitte 13-stellige Game-Id eingeben\n");
 					exit(EXIT_FAILURE);
@@ -48,6 +54,7 @@ int main(int argc, char **argv) {
                 } 
                 break;
             case 'p':
+                pFlag = true;
                 playerNr = atoi(optarg);
                 if (playerNr < 1 || playerNr > 2) {
                 	printf("Spieler 1 oder 2\n");
@@ -60,6 +67,13 @@ int main(int argc, char **argv) {
                 break;    
         }
     }
+
+    if(!gFlag) {
+        printf("Keine GameId\n");
+        exit(EXIT_FAILURE);
+    }
+
+
     rp = getconfig(&res,path);
     if(rp == NULL){
         printf("configfile err");
@@ -95,32 +109,38 @@ int main(int argc, char **argv) {
     }
 
     pid_t pid =0;
-    int fd[2];
     //int ret_code =0;
     fd[0]=fd[1]=0;
     
     int shm_id ;
     // get ID of Shared Memory Segment   
     shm_id = shmget(IPC_PRIVATE,sizeof(sharedMemory),IPC_CREAT | 0666 );
-        if(shm_id < 0) {
-            printf("shmget ERROR\n");
-            exit(EXIT_FAILURE);
-        }
+    if(shm_id < 0) {
+        printf("shmget ERROR\n");
+        exit(EXIT_FAILURE);
+    }
     // attach the Shared Memory Segment
     sm = (sharedMemory*) shmat(shm_id,NULL,0);
-        if((sharedMemory*) sm  ==  (sharedMemory*) -1) {         
-            printf("shmat Error\n");
-            exit(EXIT_FAILURE);
-         }
+    if((sharedMemory*) sm  ==  (sharedMemory*) -1) {         
+        printf("shmat Error\n");
+        exit(EXIT_FAILURE);
+    }
+
+
     sm->thinkFlag=false;
     //Pipe erzeugen
-        if(pipe(fd)<0){
-            perror("Fehler beim Einrichten der Pipe.\n");
-            exit(EXIT_FAILURE);
-        }
-    pid = fork();
-    
-    if (pid < 0) {
+    if(pipe(fd)<0) {
+        perror("Fehler beim Einrichten der Pipe.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // check if playerNr is initialized, if not change value to 3 for error handling
+    if(!pFlag) {
+        sm->me.playerNr = 3;
+        playerNr = 3;
+    }
+
+    if((pid = fork()) < 0) {
         perror ("Fehler bei fork().\n");
         exit(EXIT_FAILURE);
     }
@@ -133,12 +153,13 @@ int main(int argc, char **argv) {
         sm->connector=pid;
         signal(SIGUSR1, signalhandler);
         //ret_code = waitpid(pid, NULL, 0);
-        while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0){
+        while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0);
+        /* while((pid=waitpid(sm->connector,NULL,WNOHANG)) == 0){
             if(sm->thinkFlag){
                 write(fd[1],think(sm),3*sizeof(char));
                 sm->thinkFlag = false;
             }
-        }
+        } */
         /*
         if (ret_code < 0) {
             perror ("Fehler beim Warten auf Kindprozess.");

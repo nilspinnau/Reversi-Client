@@ -133,12 +133,17 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     }
                     else if(strncmp(buffer,"+ Game from",11) == 0){
                         printf("S:%s\n", buffer);
-                        if(playerNr == 1 || playerNr ==2 ){
+                        switch(playerNr) {
+                            case 1:
+                                toServer("PLAYER 0\n");
+                                break;
+                            case 2:
+                                toServer("PLAYER 1\n");
+                                break;
+                            case 3:
                                 toServer("PLAYER\n");
+                                break;
                         }
-                        //printf("Dia chi con tro %d\n", *buffer);    
-                        //bzero(buffer, size);
-                        
                     }
                     else if(strncmp(buffer,"+ YOU",5) == 0){
                         printf("S:%s\n", buffer);
@@ -281,6 +286,7 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     else if(strcmp(buffer,"+ OKTHINK")== 0){
                         printf("S:%s\n", buffer);
                         sm->thinker = getppid();
+                        sm->thinkFlag = true;
                         kill(sm->thinker,SIGUSR1);
                         /*
                         char themove[3];

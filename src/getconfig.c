@@ -15,11 +15,9 @@ configs *getconfig(configs *res, char * path){
     int foundu = 0;
     //memset(&res,0,sizeof(configs));
     FILE *fp;
-    printf("%s",path);
-    
 
     // has to be changed to path, throws error that path cant be found
-    fp = fopen("config.conf", "r+");
+    fp = fopen(path, "r+");
     if(fp == NULL){
         free(varstr);
         free(line);
