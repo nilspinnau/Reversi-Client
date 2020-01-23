@@ -6,9 +6,11 @@ extern sharedMemory *sm;
 
 
 int readOpponent(char *buffer) {
-    sm->enemy.playerNr = *(buffer + 3);
-    sm->enemy.registered = *(buffer + strlen(buffer) - 1);
-    strncat(sm->enemy.playerName, buffer + 4, strlen(buffer) - 3);
+    sm->enemy.playerNr = *(buffer + 2) - '0';
+    sm->enemy.registered = *(buffer + strlen(buffer) - 1)  - '0';
+    strncat(sm->enemy.playerName, buffer + 4, strlen(buffer) - 5);
+
+    printf("%d\n%d\n%s\n", sm->enemy.playerNr, sm->enemy.registered, sm->enemy.playerName);
     return 0;
 }
 
