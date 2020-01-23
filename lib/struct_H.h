@@ -21,9 +21,9 @@ typedef struct player{
 
 typedef struct spielFeld{
     int width;
-    int height; 
+    int height;
     char Feld[8][8];
-} spielFeld; 
+} spielFeld;
 
 typedef struct sharedMemory{
     volatile bool thinkFlag;
@@ -35,4 +35,3 @@ typedef struct sharedMemory{
     pid_t thinker;
     pid_t connector;
 } sharedMemory;
-
