@@ -95,16 +95,22 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         }
                         else if(strncmp(buffer,"+ Game from",11) == 0){
                             printf("S:%s\n", buffer);
-                            if(playerNr == 1 || playerNr ==2 ){
-                                toServer("PLAYER\n");
-                            }  
+                            switch(playerNr) {
+                                case 1:
+                                    toServer("PLAYER 0\n");
+                                    break;
+                                case 2:
+                                    toServer("PLAYER 1\n");
+                                    break;
+                                case 3:
+                                    toServer("PLAYER\n");
+                                    break;
+                            }    
                             //bzero(buffer, size);
-                            
                         }
                         else if(strncmp(buffer,"+ YOU",5) == 0){ 
-                            if(sscanf(buffer,"+ YOU %d %s player",&(sm->me.playerNr), sm->me.playerName)!= 2){
-                                return false;
-                            }
+                            sm->me.playerNr = buffer[6]-'0';
+                            strncat(sm->me.playerName,&(buffer[8]),strlen(buffer)-8);
                             printf("C: You are Player %d (%s)\n", (sm->me.playerNr)+1,sm->me.playerName);
                             //bzero(buffer, size);
 
@@ -126,12 +132,9 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                             //bzero(buffer,size);
                         }
                         else if((strncmp(buffer,"+ 0 ",4) == 0) && (isLastCharDigit(buffer))){
-                            printf("S:%s\n", buffer);
-                            
                             sm->enemy.playerNr=buffer[2]-'0';
                             sm->enemy.registered = buffer[strlen(buffer)-1]-'0';
-                            strncat(sm->enemy.playerName,&buffer[3], strlen(buffer)-5);
-                            printf("SBLACK:%s\n", buffer);
+                            strncat(sm->enemy.playerName,&buffer[4], strlen(buffer)-6);
                             if(sm->me.registered == 1){
                                 printf("C: Player %d (%s) is ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
                             }else{

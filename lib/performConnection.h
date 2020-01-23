@@ -14,3 +14,4 @@ bool performConnection(int socketfd, char *gameId, int playerNr,int fd[2]);
 int tokenizeshit(char* buffer, char* token[100]);
 int safe_fdClear(int fd, fd_set* fdSet, int* max_fd);
 int safe_fdSet(int fd, fd_set* fdSet, int* max_fd);
+bool isLastCharDigit(char* buffer);

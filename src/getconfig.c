@@ -16,9 +16,8 @@ configs *getconfig(configs *res, char * path){
     int foundu = 0;
     //memset(&res,0,sizeof(configs));
     FILE *fp;
-    printf("%s",path);
     
-    fp = fopen("config.conf","r+");
+    fp = fopen(path,"r+");
     if(fp == NULL){
         perror("Cant open file");
         return NULL;
