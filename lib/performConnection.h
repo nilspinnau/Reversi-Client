@@ -15,3 +15,9 @@ int performConnection(int socketfd, char *gameId, int playerNr,int fd[2]);
 // method to read the playerName into the sharedMemory, aswell as him being registered and his playerNr
 // this method doesnt need sscanf, so reducing the error suspectibility
 int readOpponent(char *buffer);
+
+int safe_fdSet(int fd, fd_set* fdSet, int* max_fd);
+
+int safe_fdClear(int fd, fd_set* fdSet, int* max_fd);
+
+int tokenizeshit(char* buffer, char* token[100]);
