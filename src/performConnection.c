@@ -262,13 +262,14 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                 */
                 if(strncmp(buffer,"+ PLAYER1WON",12) == 0){
                     printf("S:%s\n", buffer);
-                    break;
+                    
                 }
                 if(strcmp(buffer,"+ QUIT")==0){
                     printf("S:%s\n", buffer);
                     exit(EXIT_SUCCESS);
                     return Exit;
                 }
+                break;
             case '-':
                 if(strcmp(buffer,"- TIMEOUT Be faster next time") == 0){
                     printf("S:%s\n", buffer);
@@ -299,8 +300,6 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                     printf("Server malfunction\n");
                     return Exit;
                 }    
-            default:
-                return false;
             }
         }
         }
@@ -309,8 +308,8 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
             read(fd[0],themove, sizeof(themove));
             threeServer("PLAY ",themove,"\n");
             }
-            
     }    
     //free(buffer);
     return Exit; 
 }
+
