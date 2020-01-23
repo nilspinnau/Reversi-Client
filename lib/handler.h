@@ -5,22 +5,9 @@
 
 void setSocket(int socketfd);
 
-/* char *getLine();
- */
-void  toServer(char *s);
+void toServer(char *s);
+
+void twoServer(char *s1, char *s2);
 
 void threeServer(char *s1, char*s2, char *s3);
 
-void init();
-
-int cleanExit(char *s);
-
-bool isnext(char *s);
-
-char *getLine();
-
-char *getbuffer();
-
-char *nextbufLine();
-
-void resetLinebuf();

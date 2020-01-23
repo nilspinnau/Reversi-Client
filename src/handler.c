@@ -3,27 +3,9 @@
 
 int socketfd;
 char buff[256];
-char *buffindexold;
-char *buffindexnew;
 
 void setSocket(int sockfd) {
     socketfd = sockfd;
-    resetLinebuf();
-}
-
-bool isnext(char *s) {
-    
-    //bzero((char *) &buffer, sizeof(buffer));
-    buff[read(socketfd, buff, 8*1024)] = '\0';
-    printf("S: %s",buff);
-    return (strcmp(buff, s) == 0);
-}
-
-char *getLine() {
-    //bzero((char *) &buffer, sizeof(buffer));
-    buff[read(socketfd, buff, 8*1024)] = '\0';
-    printf("S: %s",buff);
-    return buff;
 }
 
 void toServer(char *s) {
@@ -45,30 +27,4 @@ void threeServer(char *s1, char *s2, char *s3) {
     strcat(buff,s3);
     write(socketfd, buff, strlen(buff));
     printf("C: %s",buff);
-}
-
-void init(){
-    //char buff[1024];
-}
-
-int cleanExit(char *s) {
-    //free(buff);
-    printf("%s\n", s);
-    return EXIT_FAILURE;
-}
-
-char *getbuffer(){
-    return buff;
-}
-void resetLinebuf(){
-    buffindexnew = buff;
-}
-char *nextbufLine(){
-    buffindexold = buffindexnew;
-    while(*buffindexnew != '\n'){
-        buffindexnew++;
-    }
-    *buffindexnew = '\0';
-    buffindexnew++;
-    return buffindexold;
 }

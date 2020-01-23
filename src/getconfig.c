@@ -57,7 +57,6 @@ configs *getconfig(configs *res, char * path){
         printf("config.conf missing content");
       return NULL;
     }
-    //htons(res.port_nr);
     */
     fclose(fp);
     free(line);

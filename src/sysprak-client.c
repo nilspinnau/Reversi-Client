@@ -9,20 +9,11 @@
 #endif
 
 
-/*
 #define GAMEKINDNAME "Reversi"
 #define PORTNUMBER 1357
 #define HOSTNAME "sysprak.priv.lab.nm.ifi.lmu.de"
-*/
 
 
-
-/*
-char playerName[20];// durch shared memory sm-> playerName ersetzt!
-int myplayerNr;// durch shared memory sm-> myplayerNr ersetzt!
-char feld[8][8];
-*/
-//readfield error handle?
 
 sharedMemory *sm;
 int fd[2];
@@ -78,10 +69,7 @@ int main(int argc, char **argv) {
     if(rp == NULL){
         printf("configfile err");
         return 0;
-    }/* 
-    printf("%s\n",rp->game_kind);
-    printf("%s\n",rp->host_name);
-    printf("%d\n",rp->port_nr); */
+    }
    
     int sockfd;
     //portno
@@ -109,7 +97,6 @@ int main(int argc, char **argv) {
     }
 
     pid_t pid =0;
-    //int ret_code =0;
     fd[0]=fd[1]=0;
     
     int shm_id ;
@@ -160,14 +147,6 @@ int main(int argc, char **argv) {
                 sm->thinkFlag = false;
             }
         } */
-        /*
-        if (ret_code < 0) {
-            perror ("Fehler beim Warten auf Kindprozess.");
-            exit(EXIT_FAILURE);
-        } 
-        */ 
-        //char *answer = think(sm);
-        //write(fd[1], answer, sizeof(answer));
     }
     
     /*
