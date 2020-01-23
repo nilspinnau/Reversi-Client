@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "../lib/getconfig.h"
+// code aufräumen
 
 
 configs *getconfig(configs *res, char * path){

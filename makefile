@@ -14,5 +14,5 @@ play:
 	./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
 valgrind:	
 	valgrind ./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
-clear:
+clean:
 	rm -f *.o sysprak-client 

@@ -31,6 +31,14 @@ int tokenizeshit(char* buffer, char* token[20]){
     return i;
  
 }
+bool isLastCharDigit(char* buffer){
+    char lastChar =buffer[strlen(buffer)-1];
+    if(isdigit(lastChar)){
+        return true;
+    }else{
+        return false;
+    }
+}
 
 bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
     size_t size =512;
@@ -106,12 +114,10 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                             //bzero(buffer,size);
                             
                         }
-                        else if(strncmp(buffer,"+ 1 \"W",6) == 0){
-                            printf("SWHITE:%s\n", buffer);
-                            if(sscanf(buffer,"+ %d %s %*s %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
-                                return false;
-                            }
-                            printf("SWHITE:%s\n", buffer);
+                        else if((strncmp(buffer,"+ 1 ",4) == 0) && (isLastCharDigit(buffer))){
+                            sm->enemy.playerNr=buffer[2]-'0';
+                            sm->enemy.registered = buffer[strlen(buffer)-1]-'0';
+                            strncat(sm->enemy.playerName,&(buffer[4]), strlen(buffer)-6);
                             if(sm->me.registered == 1){
                                 printf("C: Player %d (%s) is ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
                             }else{
@@ -119,11 +125,12 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                             }
                             //bzero(buffer,size);
                         }
-                        else if(strncmp(buffer,"+ 0 \"B",6) == 0){
+                        else if((strncmp(buffer,"+ 0 ",4) == 0) && (isLastCharDigit(buffer))){
                             printf("S:%s\n", buffer);
-                            if(sscanf(buffer,"+ %d %s %*s %d",&(sm->enemy.playerNr),sm->enemy.playerName,&(sm->me.registered))!= 3){
-                                return false;
-                            }
+                            
+                            sm->enemy.playerNr=buffer[2]-'0';
+                            sm->enemy.registered = buffer[strlen(buffer)-1]-'0';
+                            strncat(sm->enemy.playerName,&buffer[3], strlen(buffer)-5);
                             printf("SBLACK:%s\n", buffer);
                             if(sm->me.registered == 1){
                                 printf("C: Player %d (%s) is ready\n", (sm->enemy.playerNr)+1,sm->enemy.playerName);
@@ -132,6 +139,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                             }
                             //bzero(buffer,size);
                         }
+                        
                         else if(strcmp(buffer,"+ ENDPLAYERS") == 0){
                             printf("S:%s\n", buffer);
                             //bzero(buffer,size);
@@ -176,6 +184,7 @@ bool performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         else if(strcmp(buffer,"+ OKTHINK")== 0){
                             printf("S:%s\n", buffer);
                             sm->thinker = getppid();
+                            sm->thinkFlag=true;
                             kill(sm->thinker,SIGUSR1);
                         }
                         else if(strcmp(buffer,"+ MOVEOK") == 0){

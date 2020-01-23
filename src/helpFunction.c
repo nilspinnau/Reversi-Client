@@ -272,7 +272,7 @@ void minimaxDecision(char board[][8], char whoseTurn, int* x, int* y)
 // calculate the heuristic. currentTurn flips between W and B.
 int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searchPly)
 {
-	if (searchPly == 5) // Change to desired ply lookahead
+	if (searchPly == 3) // Change to desired ply lookahead
 	{
 		return heuristic(board, originalTurn); // Termination criteria
 	}
