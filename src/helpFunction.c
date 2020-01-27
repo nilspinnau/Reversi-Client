@@ -1,4 +1,7 @@
 #include "../lib/helpFunction.h"
+extern sharedMemory *sm;
+
+int searchPly;
 
 // Checks a direction from x,y to see if we can make a move
 bool checkFlip(char board[][8], int x, int y, int deltaX, int deltaY, 
@@ -227,57 +230,35 @@ int heuristic(char board[][8], char whoseTurn)
 }
 // This is the minimax decision function. It calls minimaxValue for each position
 // on the board and returns the best move (largest value returned) in x and y.
-void minimaxDecision(char board[][8], char whoseTurn, int* x, int* y)
+threadArguments *minimaxDecision(char board[][8], char whoseTurn, threadArguments *args)
 {   
-    
-	int moveX[60], moveY[60];
-	int numMoves=0;
-	char opponent = 'W';
-	if (whoseTurn == 'W')
-		opponent = 'B';
+	char opponent = {0};
 
-	numMoves=getMoveList(board, moveX, moveY, numMoves, whoseTurn);
-	if (numMoves == 0) // if no moves return -1
-	{
-        *x = -1;
-		*y = -1;
-	}
-	else
-	{
-		// Remember the best move
-		int bestMoveVal = -99999;
-		int bestX = moveX[0], bestY = moveY[0];
-		// Try out every single move
-		for (int i = 0; i < numMoves; i++)
-		{
-			// Apply the move to a new board
-			char tempBoard[8][8];
-			copyBoard(board, tempBoard);
-			makeMove(tempBoard, moveX[i], moveY[i], whoseTurn);
-			// Recursive call
-			int val = minimaxValue(tempBoard, whoseTurn, opponent, 1);
-            
-			// Remember best move
-			if (val > bestMoveVal)
-			{
-				bestMoveVal = val;
-				bestX = moveX[i];
-				bestY = moveY[i];
-               // printf("x: %d", bestX);
-			}
-		}
-		// Return the best x/y
-		*x=bestX;
-        *y=bestY;
-	}
+	if(whoseTurn == 'W') opponent = 'B';
+	else opponent = 'W';
+
+
+	// Try out every single move
+	// Apply the move to a new board
+	char tempBoard[8][8];
+	copyBoard(board, tempBoard);
+	makeMove(tempBoard, args->pos[args->i].x, args->pos[args->i].y, whoseTurn);
+	// Recursive call
+	args->pos[args->i].val = minimaxValue(tempBoard, whoseTurn, opponent, 1);
+	return args;
 }
+
+
 // minimaxValue makes a recursive call to itself to search another ply in the tree.
 // It is hard-coded here to look 5 ply ahead.  originalTurn is the original player piece
 // which is needed to determine if this is a MIN or a MAX move.  It is also needed to 
 // calculate the heuristic. currentTurn flips between W and B.
 int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searchPly)
 {
-	if (searchPly == 5) // Change to desired ply lookahead
+
+    signal(SIGALRM, signalAlarm);
+
+	if (searchPly == MAX) // Change to desired ply lookahead
 	{
 		return heuristic(board, originalTurn); // Termination criteria
 	}

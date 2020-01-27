@@ -1,5 +1,5 @@
 CC = /usr/bin/gcc
-CFLAGS = -Werror -Wextra -Wall
+CFLAGS = -Werror -Wextra -Wall -lpthread
 OBJ= src/*.c
 VAL = -ggdb3 -g
 #LDFLAGS = -lm -lpthread

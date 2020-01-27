@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "performconnection.h": "c"
+        "performconnection.h": "c",
+        "helpfunction.h": "c",
+        "think.h": "c"
     }
 }

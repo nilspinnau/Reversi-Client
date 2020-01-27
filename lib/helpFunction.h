@@ -1,6 +1,7 @@
 #ifndef struct_H
 #define struct_H
 #include "../lib/struct_H.h"
+#include "../lib/signalHandler.h"
 #endif
 
 
@@ -20,6 +21,6 @@ void copyBoard(char src[][8], char dest[][8]);
 
 int heuristic(char board[][8], char whoseTurn);
 
-void minimaxDecision(char board[][8], char whoseTurn, int* x, int* y);
+threadArguments *minimaxDecision(char board[][8], char whoseTurn, threadArguments *args);
 
 int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searchPly);

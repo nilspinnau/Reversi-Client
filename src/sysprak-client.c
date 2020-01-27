@@ -161,5 +161,6 @@ int main(int argc, char **argv) {
     shmdt((void*)sm);
     shmctl(shm_id, IPC_RMID, NULL);
     close(sockfd);
+ 
     return 0;
 }
