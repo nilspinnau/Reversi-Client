@@ -10,6 +10,9 @@ int readOpponent(char *buffer) {
     sm->enemy.registered = *(buffer + strlen(buffer) - 1)  - '0';
     strncat(sm->enemy.playerName, buffer + 4, strlen(buffer) - 5);
 
+    // set playerCount to 2
+    sm->playerCount = 2;
+
     printf("%d\n%d\n%s\n", sm->enemy.playerNr, sm->enemy.registered, sm->enemy.playerName);
     return 0;
 }
@@ -129,10 +132,9 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         
                     }
                     
-                    else if(strcmp(buffer,"+ FIELD 8,8") == 0){ 
+                    else if(strcmp(buffer,"+ FIELD") == 0){ 
                         printf("S:%s\n", buffer);
-                        sm->spielFeld.width = 8;
-                        sm->spielFeld.height = 8;
+                        sscanf(buffer, "+ FIELD %d,%d", &sm->spielFeld.width, &sm->spielFeld.height);
                         
                         
                     }else if(isdigit(buffer[2]) && isdigit(buffer[strlen(buffer) - 1])) {
