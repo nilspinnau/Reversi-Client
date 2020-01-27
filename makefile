@@ -13,6 +13,6 @@ sysprak-client: $(OBJ)
 play: 
 	./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
 valgrind:	
-	valgrind ./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
+	valgrind --leak-check=full --trace-children=yes --show-leak-kinds=all --track-origins=yes -v ./sysprak-client -g $(GAME_ID) -p $(PLAYER) 
 clean:
 	rm -f *.o sysprak-client 
