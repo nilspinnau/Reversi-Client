@@ -17,6 +17,12 @@ int readOpponent(char *buffer) {
     return 0;
 }
 
+int readPlayer(char *buffer) {
+    sm->me.playerNr = buffer[6] -'0';
+    strncat(sm->me.playerName, &(buffer[8]), strlen(buffer)-8);
+    return 0;
+}
+
 /* add a fd to fd_set, and update max_fd */
 int safe_fdSet(int fd, fd_set* fdSet, int* max_fd){
     assert(max_fd != NULL);
@@ -107,10 +113,7 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
                         }
                     }
                     else if(strncmp(buffer,"+ YOU",5) == 0){
-                        printf("S:%s\n", buffer);
-                        if(sscanf(buffer,"+ YOU %d %s",&(sm->me.playerNr), sm->me.playerName)!= 2){
-                            exit(EXIT_FAILURE);
-                        }
+                        readPlayer(buffer);
 
                     }
                     else if(strncmp(buffer,"+ TOTAL",7) == 0){
