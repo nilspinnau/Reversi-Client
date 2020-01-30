@@ -13,19 +13,13 @@
 #include <signal.h>
 #include <time.h>
 
-#define MAX (10)
+#define MAX (30)
 
 typedef struct player{
     int playerNr;
     char playerName[256];
     int registered;
 } player;
-
-typedef struct move {
-    int x;
-    int y;
-    int val;
-} move;
 
 typedef struct spielFeld{
     int width;
@@ -40,10 +34,16 @@ typedef struct alarmStruct {
     int numberOfMoves;
 } alarmStruct;
 
+typedef struct move {
+    int x;
+    int y;
+    int val;
+} move;
+
 typedef struct threadArguments {
     char whoseTurn;
     int i;
-    move pos[60];
+    int numMoves;
     char feld[8][8];
 } threadArguments;
 

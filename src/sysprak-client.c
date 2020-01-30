@@ -19,9 +19,10 @@ sharedMemory *sm;
 int fd[2];
 
 int main(int argc, char **argv) {
+    fd[0] = fd[1] = 0;
     int opt;
     char gameId[14] = {0};
-    int playerNr;
+    int playerNr = 0;
     char path[256] = {0};
     strcpy(path,"config.conf");
     configs res;

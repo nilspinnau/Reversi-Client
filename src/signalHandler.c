@@ -15,8 +15,8 @@ void signalhandler(int signum) {
 
 void signalAlarm(int signum) {
     if(signum == SIGALRM) {
-        printf("Anzahl an Druchgängen: %d\n", sm->alarm.numberOfMoves);
         printf("Alarm wurde gelesen\n");
         searchPly = MAX;
+        printf("SearchPly ist jt: %d\n", searchPly);
     }
 }

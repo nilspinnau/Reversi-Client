@@ -15,12 +15,12 @@ bool validMove(char board[][8], int x, int y, char piece);
 
 int score(char board[][8], char piece);
 
-int getMoveList(char board[][8], int moveX[], int moveY[], int numMoves, char piece);
+int getMoveList(char board[][8], move *moveList, char piece);
 
 void copyBoard(char src[][8], char dest[][8]);
 
 int heuristic(char board[][8], char whoseTurn);
 
-threadArguments *minimaxDecision(char board[][8], char whoseTurn, threadArguments *args);
+threadArguments *minimaxDecision(threadArguments *args);
 
-int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searchPly);
+int minimaxValue(threadArguments *args, char tempBoard[8][8], char currentTurn, int searchPly);

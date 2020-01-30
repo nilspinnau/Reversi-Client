@@ -2,10 +2,10 @@
 
 extern sharedMemory *sm;
 
-char *position(int *x, int *y) {
-    switch(*x){
+char *position(int x, int y) {
+    switch(x){
         case 0: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A1";
                 case 1:
@@ -24,7 +24,7 @@ char *position(int *x, int *y) {
                     return "H1";
             }
         case 1: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A2";
                 case 1:
@@ -43,7 +43,7 @@ char *position(int *x, int *y) {
                     return "H2";
             }
         case 2: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A3";
                 case 1:
@@ -62,7 +62,7 @@ char *position(int *x, int *y) {
                     return "H3";
             }
         case 3: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A4";
                 case 1:
@@ -81,7 +81,7 @@ char *position(int *x, int *y) {
                     return "H4";
             }
         case 4: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A5";
                 case 1:
@@ -100,7 +100,7 @@ char *position(int *x, int *y) {
                     return "H5";
             }
         case 5: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A6";
                 case 1:
@@ -119,7 +119,7 @@ char *position(int *x, int *y) {
                     return "H6";
             }
         case 6: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A7";
                 case 1:
@@ -138,7 +138,7 @@ char *position(int *x, int *y) {
                     return "H7";
             }
         case 7: 
-            switch(*y){
+            switch(y){
                 case 0:
                     return "A8";
                 case 1:

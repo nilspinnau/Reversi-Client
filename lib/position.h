@@ -3,4 +3,4 @@
 #include "../lib/struct_H.h"
 #endif
 
-char *position(int *x, int *y);
+char *position(int x, int y);

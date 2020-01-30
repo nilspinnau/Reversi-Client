@@ -1,5 +1,6 @@
 #include "../lib/helpFunction.h"
 extern sharedMemory *sm;
+extern move pos[60];
 
 int searchPly;
 
@@ -192,9 +193,9 @@ int score(char board[][8], char piece){
     return total;
 }
 // Fills in the arrays with valid moves for the piece.  numMoves is the number of valid moves.
-int getMoveList(char board[][8], int moveX[], int moveY[], int numMoves, char piece)
+int getMoveList(char board[][8], move *moveList, char piece)
 {
-	numMoves = 0;  // Initially no moves found
+	int numMoves = 0;  // Initially no moves found
 
 	// Check each square of the board and if we can move there, remember the coordinates
 	for (int x = 0; x < 8; x++){
@@ -202,8 +203,8 @@ int getMoveList(char board[][8], int moveX[], int moveY[], int numMoves, char pi
 		{
 			if (validMove(board, x, y, piece)) // If find valid move, remember coordinates
 			{
-				moveX[(numMoves)] = x;
-				moveY[(numMoves)] = y;
+				moveList[numMoves].x = x;
+				moveList[numMoves].y = y;
 				numMoves++;		// Increment number of moves found
                     
 			}
@@ -230,21 +231,26 @@ int heuristic(char board[][8], char whoseTurn)
 }
 // This is the minimax decision function. It calls minimaxValue for each position
 // on the board and returns the best move (largest value returned) in x and y.
-threadArguments *minimaxDecision(char board[][8], char whoseTurn, threadArguments *args)
+threadArguments *minimaxDecision(threadArguments *args)
 {   
 	char opponent = {0};
 
-	if(whoseTurn == 'W') opponent = 'B';
+	if(args->whoseTurn == 'W') opponent = 'B';
 	else opponent = 'W';
 
 
 	// Try out every single move
+	char tempBoard[8][8] = {0};
+	copyBoard(args->feld, tempBoard);
+
+	move moveList[60];
+	getMoveList(args->feld, moveList, args->whoseTurn);
 	// Apply the move to a new board
-	char tempBoard[8][8];
-	copyBoard(board, tempBoard);
-	makeMove(tempBoard, args->pos[args->i].x, args->pos[args->i].y, whoseTurn);
+	int x = moveList[args->i].x;
+	int y = moveList[args->i].y;
+	makeMove(tempBoard, x, y, args->whoseTurn);
 	// Recursive call
-	args->pos[args->i].val = minimaxValue(tempBoard, whoseTurn, opponent, 1);
+	pos[args->i].val = minimaxValue(args, tempBoard, opponent, 1);
 	return args;
 }
 
@@ -253,57 +259,52 @@ threadArguments *minimaxDecision(char board[][8], char whoseTurn, threadArgument
 // It is hard-coded here to look 5 ply ahead.  originalTurn is the original player piece
 // which is needed to determine if this is a MIN or a MAX move.  It is also needed to 
 // calculate the heuristic. currentTurn flips between W and B.
-int minimaxValue(char board[][8], char originalTurn, char currentTurn, int searchPly)
+int minimaxValue(threadArguments *args, char tempBoard[8][8], char currentTurn, int searchPly)
 {
+	
+	signal(SIGALRM, signalAlarm);
 
-    signal(SIGALRM, signalAlarm);
-
-	if (searchPly == MAX) // Change to desired ply lookahead
-	{
-		return heuristic(board, originalTurn); // Termination criteria
-	}
-	int moveX[60] = {0};
-	int moveY[60] = {0};
-	int numMoves=0;
+	//char originalTurn = args->whoseTurn;
 	char opponent = 'W';
 	if (currentTurn == 'W')
 		opponent = 'B';
 
-	numMoves=getMoveList(board, moveX, moveY, numMoves, currentTurn);
-	if (numMoves == 0) // if no moves skip to next player's turn
+	int numMoves = 0;
+	move moveList[60];
+	numMoves = getMoveList(tempBoard, moveList, currentTurn);
+	if (searchPly == MAX) // Change to desired ply lookahead
 	{
-		return minimaxValue(board, originalTurn, opponent, searchPly + 1);
+		return heuristic(tempBoard, currentTurn); // Termination criteria
+	}
+
+	bool isFull = true;
+	for(int i = 0; i < 8; i++) {
+		for(int j = 0; j < 9; j++) {
+			if(tempBoard[i][j] == '*') {
+				isFull = false;
+				break;
+			}
+		}
+	}
+	if (numMoves == 0 && !isFull) // if no moves skip to next player's turn
+	{
+		return minimaxValue(args, tempBoard, opponent, searchPly + 1);
+	} else if(numMoves == 0 && isFull) {
+		return heuristic(tempBoard, currentTurn);
 	}
 	else
 	{
-		// Remember the best move
-		int bestMoveVal = -99999; // for finding max
-		if (originalTurn != currentTurn)
-			bestMoveVal = 99999; // for finding min
-		// Try out every single move
-		for (int i = 0; i < numMoves; i++)
-		{
-			// Apply the move to a new board
-			char tempBoard[8][8] = {0};
-			copyBoard(board, tempBoard);
-			makeMove(tempBoard, moveX[i], moveY[i], currentTurn);
-			// Recursive call
-			int val = minimaxValue(tempBoard, originalTurn, opponent, searchPly + 1);
-			// Remember best move
-			if (originalTurn == currentTurn)
-			{
-				// Remember max if it's the originator's turn
-				if (val > bestMoveVal)				
-					bestMoveVal = val;				
-			}
-			else
-			{
-				// Remember min if it's opponent turn
-				if (val < bestMoveVal)
-					bestMoveVal = val;
-			}
-		}
-		return bestMoveVal;
+
+		// Apply the move to a new board
+		char tempBoardNew[8][8] = {0};
+		copyBoard(tempBoard, tempBoardNew);
+		int x = moveList[args->i].x;
+		int y = moveList[args->i].y;
+		makeMove(tempBoardNew, x, y, currentTurn);
+		// Recursive call
+		int val = minimaxValue(args, tempBoardNew, opponent, searchPly + 1);
+		// Remember best move
+		return val;
 	}
 	return -1;  // Should never get here
 }
