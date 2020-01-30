@@ -51,8 +51,9 @@ int think(sharedMemory *sm){
     int bestIndex = 0;
 
     for(int i = 0; i < numMoves; i++) {
-        printf("Wert x an index: %d %d\n", i, pos[i].x);
-        printf("Wert y an index: %d %d\n", i, pos[i].y);
+        printf("Wert x an index %d: %d\n", i, pos[i].x);
+        printf("Wert y an index %d: %d\n", i, pos[i].y);
+        printf("Wert von val and index %d: %d", i, pos[i].val);
     }
     for(int i = 1; i < numMoves; i++) {
         // check which is the best solution
@@ -65,7 +66,6 @@ int think(sharedMemory *sm){
     bestY = pos[bestIndex].y;
     printf("Best x: %d and best y: %d\n", bestX, bestY);
     write(fd[1], position(bestX, bestY), 3*sizeof(char));
-
     return 0;    
 }
 

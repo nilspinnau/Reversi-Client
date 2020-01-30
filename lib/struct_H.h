@@ -13,7 +13,7 @@
 #include <signal.h>
 #include <time.h>
 
-#define MAX (30)
+#define MAX (20)
 
 typedef struct player{
     int playerNr;

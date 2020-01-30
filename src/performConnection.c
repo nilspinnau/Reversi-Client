@@ -228,7 +228,9 @@ int performConnection(int socketfd, char *gameId, int playerNr, int fd[2]) {
             char themove[3];
             read(fd[0],themove, sizeof(themove));
             threeServer("PLAY ",themove,"\n");
-            }
+            //bzero(&fd[0], sizeof(fd[0]));
+            //bzero(&fd[1], sizeof(fd[1]));
+        }
             
     }    
     exit(EXIT_SUCCESS); 

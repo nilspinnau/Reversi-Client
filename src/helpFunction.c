@@ -295,16 +295,21 @@ int minimaxValue(threadArguments *args, char tempBoard[8][8], char currentTurn, 
 	else
 	{
 
-		// Apply the move to a new board
-		char tempBoardNew[8][8] = {0};
-		copyBoard(tempBoard, tempBoardNew);
-		int x = moveList[args->i].x;
-		int y = moveList[args->i].y;
-		makeMove(tempBoardNew, x, y, currentTurn);
-		// Recursive call
-		int val = minimaxValue(args, tempBoardNew, opponent, searchPly + 1);
-		// Remember best move
-		return val;
+		
+		for(int i = 0; i < numMoves; i++) {
+			// Apply the move to a new board
+			char tempBoardNew[8][8] = {0};
+			copyBoard(tempBoard, tempBoardNew);
+			//int x = moveList[args->i].x;
+			//int y = moveList[args->i].y;
+			int x = moveList[i].x;
+			int y = moveList[i].y;
+			makeMove(tempBoardNew, x, y, currentTurn);
+			// Recursive call
+			int val = minimaxValue(args, tempBoardNew, opponent, searchPly + 1);
+			// Remember best move
+			return val;
+		}
 	}
 	return -1;  // Should never get here
 }
